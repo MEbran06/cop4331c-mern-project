@@ -49,6 +49,7 @@ export function RootLayout() {
       {/* Only non-authenticated users */}
       <Stack.Protected guard={!user}>
         <Stack.Screen name="sign-in" />
+        <Stack.Screen name="sign-up" />
       </Stack.Protected>
     </Stack>
   );

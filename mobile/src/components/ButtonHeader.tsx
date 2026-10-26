@@ -36,7 +36,7 @@ function determineButton(button: ButtonType, action: ()=>void, theme: Theme) {
 
 export function ButtonHeader({children, buttonOnLeft=true, onAction, buttonType, theme}: ButtonHeaderProps) {
     return (
-    <View style={{flexDirection: "row", justifyContent:"space-between", alignItems:"center"}}>
+    <View style={{flexDirection: "row", justifyContent:"space-between", alignItems:"center", marginBottom:10}}>
         {!buttonOnLeft && children}
         {determineButton(buttonType, onAction, theme)}
         {buttonOnLeft && children}

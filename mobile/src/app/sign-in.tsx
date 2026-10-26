@@ -31,7 +31,7 @@ async function handleSubmit(data: {email: string,  password: string}, setErrors:
         email: data.email,
         role: "club"
     };
-
+    // replace with call to backend
     const token = await simulateGenerateToken(user);
     return token;
 }
@@ -40,7 +40,7 @@ export default function SignIn() {
   const { signIn } = useSession();
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
-  const [errors, setErrors] = useState<{email: string, password: string}>();
+  const [errors, setErrors] = useState<{email?: string[], password?: string[]}>();
   const [isPasswordHidden, setPasswordHidden] = useState(true);
   const insets = useSafeAreaInsets();
   const router = useRouter();
@@ -60,7 +60,7 @@ export default function SignIn() {
         <View style={{marginTop: 18}}>
             <Text style={styles.customText}>EMAIL</Text>
             <TextInput style={styles.input} placeholder='Email' value={email} onChangeText={setEmail}/>
-            {errors && <Text style={styles.fieldError}>*{errors.email[0]}</Text>}
+            {errors?.email && <Text style={styles.fieldError}>*{errors.email[0]}</Text>}
             <View style={{flexDirection: "row", justifyContent:"space-between", marginTop: 20}}>
                 <Text style={styles.customText}>PASSWORD </Text>
                 <Text style={[styles.linkText, {color: theme.ink, borderBottomColor: theme.ink, marginRight: 15}]} onPress={()=>null}>
@@ -73,13 +73,13 @@ export default function SignIn() {
                     {isPasswordHidden ? <EyeIcon  /> : <EyeOffIcon />}
                 </Pressable>
             </View>
-            {errors && <Text style={styles.fieldError}>*{errors.password}</Text>}
+            {errors?.password && <Text style={styles.fieldError}>*{errors.password[0]}</Text>}
             <View style={{marginTop: 20,}}>
             <ArrowButton label='Log In' theme={theme}
                 onPress={async () => {
                     const token = await handleSubmit({email, password}, setErrors);
-                    if (token) 
-                        signIn(token); // token if successful
+                    if (!!token) 
+                        signIn(token); // sign in
                 }}>
             </ArrowButton>
             </View>
