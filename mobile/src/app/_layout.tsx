@@ -36,7 +36,7 @@ export function RootLayout() {
   return (
     <Stack screenOptions={{ headerShown: false }}>
       {/* Only logged-in users */}
-      <Stack.Protected guard={!!session}>
+      <Stack.Protected guard={!!user}>
         <Stack.Protected guard={user?.role === 'student'}>
           <Stack.Screen name="(user_student)" />
         </Stack.Protected>
@@ -47,7 +47,7 @@ export function RootLayout() {
       </Stack.Protected>
 
       {/* Only non-authenticated users */}
-      <Stack.Protected guard={!session}>
+      <Stack.Protected guard={!user}>
         <Stack.Screen name="sign-in" />
       </Stack.Protected>
     </Stack>
