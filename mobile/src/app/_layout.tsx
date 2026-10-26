@@ -10,6 +10,9 @@ import {
 } from '@expo-google-fonts/archivo';
 import { ArchivoNarrow_700Bold } from '@expo-google-fonts/archivo-narrow';
 
+export const unstable_settings = {
+  anchor: 'sign-in',
+};
 
 
 export default function Root() {
@@ -44,12 +47,15 @@ export function RootLayout() {
         <Stack.Protected guard={user?.role === 'club'}>
           <Stack.Screen name="(user_club)" />
         </Stack.Protected>
+
+        <Stack.Screen name="preferences" />
       </Stack.Protected>
 
       {/* Only non-authenticated users */}
       <Stack.Protected guard={!user}>
         <Stack.Screen name="sign-in" />
         <Stack.Screen name="sign-up" />
+        <Stack.Screen name="verify" />
       </Stack.Protected>
     </Stack>
   );

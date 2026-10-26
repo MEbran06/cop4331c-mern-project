@@ -1,7 +1,7 @@
 import { KeyboardAvoidingView, Pressable, ScrollView, StyleSheet, Text, TextInput, View } from 'react-native';
 import { themes, fonts, Theme, spacing } from '@/constants/theme';
 import { theme, isIOS } from './preferences';
-import { ArrowButton, IconButton } from '@/components/ThemedButton';
+import { ArrowButton, EyeButton, IconButton } from '@/components/ThemedButton';
 import { ImperativeRouter, useRouter } from 'expo-router';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { ButtonHeader } from '@/components/ButtonHeader';
@@ -10,6 +10,8 @@ import { useState } from 'react';
 import {Ionicons} from '@react-native-vector-icons/ionicons';
 import * as z from 'zod';
 import { EyeIcon, EyeOffIcon } from '@/components/icons';
+import { ScrollableSection } from '@/components/ScrollableSection';
+import { ThemedInputContainer, ThemedText, ThemedTextInput } from '@/components/ThemedInputs';
 
 const signUpFormSchema = z.object({
     fullName: z.string().min(1, {message: 'Name is required'}),
@@ -47,15 +49,14 @@ export default function SignUp() {
             <Text>step 1 of 2</Text>
         </ButtonHeader>
 
-        <KeyboardAvoidingView style={{flex: 1}} behavior={isIOS ? 'padding': undefined}>
-        <ScrollView keyboardShouldPersistTaps='handled' alwaysBounceVertical={false} showsVerticalScrollIndicator={false}>  
+        <ScrollableSection>
         <View style={{marginTop: spacing.gap}}>
             <Text style={styles.DisplayText}>create your</Text>
             <Highlight background={theme.hi} textStyle={styles.DisplayText}>account</Highlight>
         </View>
 
         <View style={{marginTop:spacing.gap}}>
-            <Text style={styles.customText}>I'm signing up as</Text>
+            <ThemedText outerStyle={{justifyContent:"flex-start"}} text="I'm signing up as" theme={theme}/>
             <View style={{flexDirection:'row', gap: 12}}>
             <RoleCard
                 title="Student"
@@ -77,37 +78,36 @@ export default function SignUp() {
         </View>
 
         <View style={{marginTop:spacing.gap}}>
-            <Text style={styles.customText}>full name</Text>
-            <TextInput style={styles.input} placeholder='John Doe' value={fullName} onChangeText={setFullName}/>
-            {errors?.fullName && <Text style={styles.fieldError}>*{errors.fullName[0]}</Text>}
-            <Text style={styles.customText}>university email</Text>
-            <TextInput style={styles.input} placeholder='you@university.edu' value={email} onChangeText={setEmail}/>
-            <Text style={styles.customTextBody}>Use your school email. We'll send a code to confirm you're a student.</Text>
-            {errors?.email && <Text style={styles.fieldError}>*{errors.email[0]}</Text>}
-            <Text style={[styles.customText, {marginTop: 10}]}>password</Text>
-            <View style={styles.passwordWrapper}>
-                <TextInput style={{flex: 1, paddingHorizontal: 15}} secureTextEntry={isPasswordHidden} placeholder='Password' value={password} onChangeText={setPassword}/>
-                <Pressable style={styles.hidePasswordButton} onPress={() => setPasswordHidden(!isPasswordHidden)}>
-                    {isPasswordHidden ? <EyeIcon  /> : <EyeOffIcon />}
-                </Pressable>
-            </View>
-            {errors?.password && <Text style={styles.fieldError}>*{errors.password[0]}</Text>}
+            <ThemedInputContainer theme={theme} label='full name' error={errors?.fullName?.at(0)}>
+                <ThemedTextInput placeholder='John Doe' value={fullName} onChangeText={setFullName} theme={theme}/>
+            </ThemedInputContainer>
+            <ThemedInputContainer theme={theme} 
+                label='university email' 
+                error={errors?.email?.at(0)}
+                hint="Use your school email. We'll send a code to confirm you're a student.">
+                <ThemedTextInput placeholder='you@university.edu' value={email} onChangeText={setEmail} theme={theme}/>
+            </ThemedInputContainer>
+            <ThemedInputContainer theme={theme} 
+                    label='password'
+                    error={errors?.password?.at(0)}>
+                <ThemedTextInput theme={theme} 
+                    secureTextEntry={isPasswordHidden} 
+                    placeholder='Password' value={password} 
+                    onChangeText={setPassword}
+                    right={<EyeButton toggle={isPasswordHidden} onPress={() => setPasswordHidden(!isPasswordHidden)}/>}/>
+            </ThemedInputContainer>
         </View>
-        </ScrollView>
-        </KeyboardAvoidingView>
+        </ScrollableSection>  
 
         <View style={styles.footer}>
-            <View style={{marginHorizontal: 20}}>
+            <View style={{marginHorizontal: 20, marginBottom: 5}}>
                 <ArrowButton onPress={async () => {
                     await handleSubmit({role, fullName, email, password}, setErrors, router);
                 }} direction='forward' label='create account' theme={theme}></ArrowButton>
             </View>
-            <View style={{flexDirection: "row", justifyContent:"center", marginTop: "auto", paddingBottom:30}}>
-                <Text style={styles.customText}>have an account? </Text>
-                <Text style={styles.linkText} onPress={()=>router.back()}>
-                    log in
-                </Text>
-            </View>
+            <ThemedText text='have an account?' 
+                        theme={theme} link='log in'
+                        onLinkPress={()=>router.back()}/>
         </View>
         </View>
     );
@@ -171,67 +171,13 @@ const styles = StyleSheet.create({
         flex: 1,
         paddingHorizontal: 20,
     },
-    customText: {
-        fontFamily: fonts.label,
-        color: theme.ink,
-        letterSpacing: 1,
-        padding: 5,
-        textTransform: "uppercase"
-    },
-    customTextBody: {
-        fontFamily: fonts.body,
-        color: theme.muted
-    },
-    input: { 
-        height: 54, 
-        borderWidth: theme.borderWidth, 
-        borderColor: theme.ink, 
-        backgroundColor: theme.card, 
-        fontFamily: fonts.body, 
-        fontSize: 16,
-        marginTop: 4,
-        marginBottom: 8,
-        paddingHorizontal: 15
-    },
-    linkText: {
-        fontFamily: fonts.label, 
-        color: theme.primaryText, 
-        borderBottomWidth: 3,
-        letterSpacing: 1,
-        paddingTop: 5,
-        marginBottom: 5,
-        borderBottomColor: theme.primaryText,
-        textTransform: "uppercase"
-    },
     footer: {
-        marginTop:spacing.gap, 
         borderTopWidth: 3, 
         borderColor: theme.ink,
-        paddingTop: 20, 
+        paddingVertical: 20, 
         backgroundColor: theme.card, 
         marginHorizontal: -20, 
         marginBottom:-20
-    },
-    fieldError: {
-        fontFamily: fonts.label,
-        fontSize: 12,
-        letterSpacing: 1,
-        textTransform: 'uppercase',
-        color: theme.primaryText,
-        marginTop: 6,
-    },
-    passwordWrapper: {
-        height: 54, 
-        flexDirection:"row", 
-        borderWidth: theme.borderWidth,
-        backgroundColor: theme.card,
-        marginTop: 10
-    },
-    hidePasswordButton: {
-        width: 52,
-        borderLeftWidth: 4,
-        justifyContent: "center",
-        alignItems: "center"
     },
 });
 

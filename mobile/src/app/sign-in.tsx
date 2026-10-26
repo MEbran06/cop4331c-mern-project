@@ -1,8 +1,7 @@
 import { TextInput, StyleSheet, View, Text, Pressable, ScrollView, KeyboardAvoidingView, Platform } from 'react-native';
 import {useState} from 'react'
-import {ArrowButton} from '@/components/ThemedButton'
+import {ArrowButton, EyeButton} from '@/components/ThemedButton'
 import { DotGrid, CornerSquares, Highlight } from '@/components/decor';
-import { EyeIcon, EyeOffIcon } from '@/components/icons';
 import { themes, fonts } from '@/constants/theme';
 import { StripeBand } from '@/components/decor';
 import { useSession } from '@/contexts/ctx';
@@ -12,6 +11,8 @@ import * as z from 'zod';
 import { theme, isIOS } from './preferences';
 // simulate for now since backend hasn't implemented it
 import {simulateGenerateToken, UserPayload} from '@/utils/mockJwt'
+import { ScrollableSection } from '@/components/ScrollableSection';
+import { ThemedInputContainer, ThemedText, ThemedTextInput } from '@/components/ThemedInputs';
 
 
 const loginFormSchema = z.object({
@@ -50,30 +51,26 @@ export default function SignIn() {
             <DotGrid color={theme.ink} />
             <CornerSquares accent={theme.s3} ink={theme.ink} />
         </View>
-        <KeyboardAvoidingView style={{flex: 1}} behavior={isIOS ? 'padding': undefined}>
-        <ScrollView keyboardShouldPersistTaps='handled' alwaysBounceVertical={false} showsVerticalScrollIndicator={false}>
+        <ScrollableSection>
         <View style={{marginTop: 18}}>
             <Text style={styles.DisplayText}>WELCOME</Text>
             <Highlight background={theme.hi} textStyle={styles.DisplayText}>back!</Highlight>
             <Text style={{color: theme.muted, fontFamily: fonts.body}}>Log in to see what your clubs are up to.</Text>
         </View>
         <View style={{marginTop: 18}}>
-            <Text style={styles.customText}>EMAIL</Text>
-            <TextInput style={styles.input} placeholder='Email' value={email} onChangeText={setEmail}/>
-            {errors?.email && <Text style={styles.fieldError}>*{errors.email[0]}</Text>}
-            <View style={{flexDirection: "row", justifyContent:"space-between", marginTop: 20}}>
-                <Text style={styles.customText}>PASSWORD </Text>
-                <Text style={[styles.linkText, {color: theme.ink, borderBottomColor: theme.ink, marginRight: 15}]} onPress={()=>null}>
-                    FORGOT?
-                </Text>
-            </View>
-            <View style={styles.passwordWrapper}>
-                <TextInput style={{flex: 1, paddingHorizontal: 15}} secureTextEntry={isPasswordHidden} placeholder='Password' value={password} onChangeText={setPassword}/>
-                <Pressable style={styles.hidePasswordButton} onPress={() => setPasswordHidden(!isPasswordHidden)}>
-                    {isPasswordHidden ? <EyeIcon  /> : <EyeOffIcon />}
-                </Pressable>
-            </View>
-            {errors?.password && <Text style={styles.fieldError}>*{errors.password[0]}</Text>}
+            <ThemedInputContainer theme={theme} label='email' error={errors?.email?.at(0)}>
+                <ThemedTextInput placeholder='Email' value={email} onChangeText={setEmail} theme={theme}/>
+            </ThemedInputContainer>
+            <ThemedInputContainer theme={theme} 
+                    label='password'
+                    error={errors?.password?.at(0)} 
+                    labelRight={<Text style={styles.forgotLink} onPress={()=>null}>FORGOT?</Text>}>
+                <ThemedTextInput theme={theme} 
+                    secureTextEntry={isPasswordHidden} 
+                    placeholder='Password' value={password} 
+                    onChangeText={setPassword}
+                    right={<EyeButton toggle={isPasswordHidden} onPress={() => setPasswordHidden(!isPasswordHidden)}/>}/>
+            </ThemedInputContainer>
             <View style={{marginTop: 20,}}>
             <ArrowButton label='Log In' theme={theme}
                 onPress={async () => {
@@ -84,14 +81,10 @@ export default function SignIn() {
             </ArrowButton>
             </View>
         </View>
-        </ScrollView>
-        </KeyboardAvoidingView>
-        <View style={{flexDirection: "row", justifyContent:"center", marginTop: "auto", paddingBottom:30}}>
-            <Text style={styles.customText}>NEW HERE? </Text>
-            <Text style={styles.linkText} onPress={()=>router.navigate('/sign-up')}>
-                CREATE ACCOUNT
-            </Text>
-        </View>
+        </ScrollableSection>
+        <ThemedText text='new here?' 
+            theme={theme} link='create account'
+            onLinkPress={()=>router.navigate('/sign-up')}/>
         <StripeBand ink={theme.ink} background={theme.card} style={{ position: 'absolute', left: 0, right: 0, bottom: 0}} />
     </View>
   );
@@ -103,61 +96,20 @@ const styles = StyleSheet.create({
         fontSize: 60, 
         textTransform: 'uppercase'
     },
-    input: { 
-        height: 54, 
-        borderWidth: theme.borderWidth, 
-        borderColor: theme.ink, 
-        backgroundColor: theme.card, 
-        fontFamily: fonts.body, 
-        fontSize: 16,
-        marginVertical: 4,
-        paddingHorizontal: 15
-    },
     container: { 
         flex: 1,
         paddingHorizontal: 20,
     },
-    buttonText: {
-        fontFamily: fonts.label,
-        fontSize: 14,
-        letterSpacing: 1.1
-    },
-    hidePasswordButton: {
-        width: 52,
-        borderLeftWidth: 4,
-        justifyContent: "center",
-        alignItems: "center"
-    },
-    passwordWrapper: {
-        height: 54, 
-        flexDirection:"row", 
-        borderWidth: theme.borderWidth,
-        backgroundColor: theme.card,
-        marginTop: 10
-    },
-    linkText: {
-        fontFamily: fonts.label, 
-        color: theme.primaryText, 
+    forgotLink: {
+        fontFamily: fonts.label,  
         borderBottomWidth: 3,
         letterSpacing: 1,
         paddingTop: 5,
         marginBottom: 5,
-        borderBottomColor: theme.primaryText
-    },
-    customText: {
-        fontFamily: fonts.label,
-        color: theme.ink,
-        letterSpacing: 1,
-        padding: 5
-    },
-    fieldError: {
-        fontFamily: fonts.label,
-        fontSize: 12,
-        letterSpacing: 1,
-        textTransform: 'uppercase',
-        color: theme.primaryText,
-        marginTop: 6,
-    },
+        color: theme.ink, 
+        borderBottomColor: theme.ink, 
+        marginRight: 15
+    }
 
     
 })

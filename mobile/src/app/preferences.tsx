@@ -4,7 +4,7 @@ import { themes } from '@/constants/theme';
 export const theme = themes.retro;
 export const isIOS = Platform.OS === 'ios'
 
-export default function preferences() {
+export default function Preferences() {
 
   return (
     <View style={{ flex: 1, justifyContent: 'center', alignItems: 'center' }}>
