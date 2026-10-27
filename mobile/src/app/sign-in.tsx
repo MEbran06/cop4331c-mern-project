@@ -1,18 +1,18 @@
-import { TextInput, StyleSheet, View, Text, Pressable, ScrollView, KeyboardAvoidingView, Platform } from 'react-native';
+import { StyleSheet, View, Text } from 'react-native';
 import {useState} from 'react'
 import {ArrowButton, EyeButton} from '@/components/ThemedButton'
 import { DotGrid, CornerSquares, Highlight } from '@/components/decor';
-import { themes, fonts } from '@/constants/theme';
+import { fonts, spacing } from '@/constants/theme';
 import { StripeBand } from '@/components/decor';
 import { useSession } from '@/contexts/ctx';
-import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { useRouter } from 'expo-router';
 import * as z from 'zod';
-import { theme, isIOS } from './preferences';
+import { theme } from './preferences';
 // simulate for now since backend hasn't implemented it
 import {simulateGenerateToken, UserPayload} from '@/utils/mockJwt'
 import { ScrollableSection } from '@/components/ScrollableSection';
-import { ThemedInputContainer, ThemedText, ThemedTextInput } from '@/components/ThemedInputs';
+import { ThemedDisplayTitle, ThemedInputContainer, ThemedText, ThemedTextInput } from '@/components/ThemedInputs';
+import { PageContainer } from '@/components/PageContainer';
 
 
 const loginFormSchema = z.object({
@@ -43,20 +43,18 @@ export default function SignIn() {
   const [password, setPassword] = useState('');
   const [errors, setErrors] = useState<{email?: string[], password?: string[]}>();
   const [isPasswordHidden, setPasswordHidden] = useState(true);
-  const insets = useSafeAreaInsets();
   const router = useRouter();
   return (
-    <View style={[styles.container, {paddingTop:insets.top, paddingBottom:insets.bottom}]}>
+    <PageContainer>
         <View style={{flexDirection: "row", justifyContent:"space-between"}}>
             <DotGrid color={theme.ink} />
             <CornerSquares accent={theme.s3} ink={theme.ink} />
         </View>
         <ScrollableSection>
-        <View style={{marginTop: 18}}>
-            <Text style={styles.DisplayText}>WELCOME</Text>
-            <Highlight background={theme.hi} textStyle={styles.DisplayText}>back!</Highlight>
-            <Text style={{color: theme.muted, fontFamily: fonts.body}}>Log in to see what your clubs are up to.</Text>
-        </View>
+        <ThemedDisplayTitle text='welcome' highlight='back!' theme={theme}/>
+        <Text style={{color: theme.muted, fontFamily: fonts.body, marginTop: 10}}>
+            Log in to see what your clubs are up to.
+        </Text>
         <View style={{marginTop: 18}}>
             <ThemedInputContainer theme={theme} label='email' error={errors?.email?.at(0)}>
                 <ThemedTextInput placeholder='Email' value={email} onChangeText={setEmail} theme={theme}/>
@@ -86,7 +84,7 @@ export default function SignIn() {
             theme={theme} link='create account'
             onLinkPress={()=>router.navigate('/sign-up')}/>
         <StripeBand ink={theme.ink} background={theme.card} style={{ position: 'absolute', left: 0, right: 0, bottom: 0}} />
-    </View>
+    </PageContainer>
   );
 }
 
@@ -95,10 +93,6 @@ const styles = StyleSheet.create({
         fontFamily: fonts.display, 
         fontSize: 60, 
         textTransform: 'uppercase'
-    },
-    container: { 
-        flex: 1,
-        paddingHorizontal: 20,
     },
     forgotLink: {
         fontFamily: fonts.label,  

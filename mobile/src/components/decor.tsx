@@ -99,7 +99,7 @@ export function Highlight({
   textStyle,
 }: { children: React.ReactNode; background?: string; textStyle?: StyleProp<TextStyle> }) {
   return (
-    <View style={{ alignSelf: 'flex-start', backgroundColor: background, paddingHorizontal: 10, paddingTop: 4, marginTop: 6 }}>
+    <View style={{ alignSelf: 'flex-start', backgroundColor: background, paddingHorizontal: 5, paddingTop: 1, marginTop: 2 }}>
       <Text style={textStyle}>{children}</Text>
     </View>
   );

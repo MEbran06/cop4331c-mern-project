@@ -1,6 +1,7 @@
-import { fonts, Theme } from "@/constants/theme";
+import { fonts, spacing, Theme } from "@/constants/theme";
 import { ReactNode, useMemo } from "react";
 import { StyleProp, StyleSheet, Text, TextInput, View, ViewStyle, TextInputProps } from "react-native";
+import { Highlight } from "./decor";
 
 
 interface ThemedTextInputProps extends TextInputProps {
@@ -74,9 +75,36 @@ export function ThemedText({outerStyle, text, link, onLinkPress, theme}: ThemedT
     );
 }
 
+interface ThemedDisplayTitleProps {
+    text: string,
+    highlight?: string,
+    highlightedFirst?: boolean,
+    theme: Theme,
+    fontSize?: number,
+    inline?: boolean
+}
 
-const stylesGen = (theme: Theme) => {
+export function ThemedDisplayTitle({text, highlight, highlightedFirst=false, theme, fontSize = 60, inline=false}: ThemedDisplayTitleProps) {
+    const styles = useMemo(() => {
+        return stylesGen(theme, fontSize); 
+    }, [theme, fontSize]);
+    return (
+        <View style={[{marginTop: spacing.gap}, (inline? {flexDirection:"row", alignItems:"center"}: {})]}>
+            {highlightedFirst && <Highlight background={theme.hi} textStyle={styles.DisplayText}>{highlight}</Highlight>}
+            <Text style={[styles.DisplayText, (inline ? {marginHorizontal: 10}:{})]}>{text}</Text>
+            {!highlightedFirst && <Highlight background={theme.hi} textStyle={styles.DisplayText}>{highlight}</Highlight>}
+        </View>
+    );
+}
+
+
+const stylesGen = (theme: Theme, size: number = 60) => {
     return StyleSheet.create({
+        DisplayText: {
+            fontFamily: fonts.display, 
+            fontSize: size, 
+            textTransform: 'uppercase'
+        },
         input: { 
             flex: 1,  
             fontFamily: fonts.body, 

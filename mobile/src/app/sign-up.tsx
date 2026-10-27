@@ -1,17 +1,16 @@
-import { KeyboardAvoidingView, Pressable, ScrollView, StyleSheet, Text, TextInput, View } from 'react-native';
-import { themes, fonts, Theme, spacing } from '@/constants/theme';
-import { theme, isIOS } from './preferences';
-import { ArrowButton, EyeButton, IconButton } from '@/components/ThemedButton';
+import { Pressable, StyleSheet, Text, View } from 'react-native';
+import { fonts, Theme, spacing } from '@/constants/theme';
+import { theme } from './preferences';
+import { ArrowButton, EyeButton } from '@/components/ThemedButton';
 import { ImperativeRouter, useRouter } from 'expo-router';
-import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { ButtonHeader } from '@/components/ButtonHeader';
 import { HardShadow, Highlight } from '@/components/decor';
 import { useState } from 'react';
 import {Ionicons} from '@react-native-vector-icons/ionicons';
 import * as z from 'zod';
-import { EyeIcon, EyeOffIcon } from '@/components/icons';
 import { ScrollableSection } from '@/components/ScrollableSection';
-import { ThemedInputContainer, ThemedText, ThemedTextInput } from '@/components/ThemedInputs';
+import { ThemedDisplayTitle, ThemedInputContainer, ThemedText, ThemedTextInput } from '@/components/ThemedInputs';
+import { PageContainer } from '@/components/PageContainer';
 
 const signUpFormSchema = z.object({
     fullName: z.string().min(1, {message: 'Name is required'}),
@@ -31,12 +30,12 @@ async function handleSubmit(data: {role: string, fullName: string, email: string
     //TODO: call backend
     
     // send to verification
-    router.push('/verify');
+    router.push({ pathname: '/verify', params: { email: data.email } });
+
 }
 
 export default function SignUp() {
     const router = useRouter();
-    const insets = useSafeAreaInsets();
     const [email, setEmail] = useState('');
     const [password, setPassword] = useState('');
     const [fullName, setFullName] = useState('');
@@ -44,16 +43,13 @@ export default function SignUp() {
     const [errors, setErrors] = useState<{fullName?: string[], email?: string[], password?: string[]}>();
     const [role, setRole] = useState<'student'|'club'>('student');
     return (
-        <View style={[styles.container, {paddingTop:insets.top, paddingBottom:insets.bottom}]}>
+        <PageContainer>
         <ButtonHeader onAction={() => router.back()} buttonType='arrow-left' theme={theme}>
             <Text>step 1 of 2</Text>
         </ButtonHeader>
 
         <ScrollableSection>
-        <View style={{marginTop: spacing.gap}}>
-            <Text style={styles.DisplayText}>create your</Text>
-            <Highlight background={theme.hi} textStyle={styles.DisplayText}>account</Highlight>
-        </View>
+        <ThemedDisplayTitle fontSize={48} text='create your' highlight='account' theme={theme}/>
 
         <View style={{marginTop:spacing.gap}}>
             <ThemedText outerStyle={{justifyContent:"flex-start"}} text="I'm signing up as" theme={theme}/>
@@ -109,7 +105,7 @@ export default function SignUp() {
                         theme={theme} link='log in'
                         onLinkPress={()=>router.back()}/>
         </View>
-        </View>
+        </PageContainer>
     );
 }
 
@@ -166,10 +162,6 @@ const styles = StyleSheet.create({
         fontFamily: fonts.display, 
         fontSize: 48, 
         textTransform: 'uppercase'
-    },
-    container: {
-        flex: 1,
-        paddingHorizontal: 20,
     },
     footer: {
         borderTopWidth: 3, 
