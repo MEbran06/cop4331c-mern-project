@@ -4,7 +4,7 @@ import { StyleSheet, View } from "react-native";
 import { EdgeInsets, useSafeAreaInsets } from "react-native-safe-area-context";
 
 
-export function PageContainer({children}: {children: ReactNode}) {
+export function PageContainer({children}: {children?: ReactNode}) {
     const insets = useSafeAreaInsets();
     const styles = useMemo(() => stylesGen(insets), [insets]);
     return (

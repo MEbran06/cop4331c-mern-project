@@ -62,7 +62,7 @@ export default function SignIn() {
             <ThemedInputContainer theme={theme} 
                     label='password'
                     error={errors?.password?.at(0)} 
-                    labelRight={<Text style={styles.forgotLink} onPress={()=>null}>FORGOT?</Text>}>
+                    labelRight={<Text style={styles.forgotLink} onPress={()=>router.navigate('/forgot-password-start')}>FORGOT?</Text>}>
                 <ThemedTextInput theme={theme} 
                     secureTextEntry={isPasswordHidden} 
                     placeholder='Password' value={password} 

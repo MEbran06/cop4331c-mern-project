@@ -4,7 +4,7 @@ import { KeyboardAvoidingView, ScrollView } from "react-native";
 
 
 interface Props {
-    children: ReactNode
+    children?: ReactNode
 }
 
 export function ScrollableSection({children}: Props) {
