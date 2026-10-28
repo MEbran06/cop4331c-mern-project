@@ -1,5 +1,5 @@
 import { ReactNode } from "react";
-import { View } from "react-native";
+import { StyleProp, View, ViewStyle } from "react-native";
 import { ArrowButton, IconButton } from "./ThemedButton";
 import { NotificationsIcon } from "./icons";
 import { Theme } from "@/constants/theme";
@@ -11,7 +11,8 @@ interface ButtonHeaderProps {
     buttonOnLeft ?: boolean,
     onAction : () => void,
     buttonType : ButtonType,
-    theme: Theme
+    theme: Theme,
+    style?: StyleProp<ViewStyle>;
 };
 
 function determineButton(button: ButtonType, action: ()=>void, theme: Theme) {
@@ -34,9 +35,9 @@ function determineButton(button: ButtonType, action: ()=>void, theme: Theme) {
     }
 }
 
-export function ButtonHeader({children, buttonOnLeft=true, onAction, buttonType, theme}: ButtonHeaderProps) {
+export function ButtonHeader({children, buttonOnLeft=true, onAction, buttonType, theme, style}: ButtonHeaderProps) {
     return (
-    <View style={{flexDirection: "row", justifyContent:"space-between", alignItems:"center", marginBottom:10}}>
+    <View style={[{flexDirection: "row", justifyContent:"space-between", alignItems:"center", marginBottom: 10}, style]}>
         {!buttonOnLeft && children}
         {determineButton(buttonType, onAction, theme)}
         {buttonOnLeft && children}

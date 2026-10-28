@@ -71,15 +71,13 @@ export function ThemedButton({
   );
 }
 
-// ---------------------------------------------------------------------------
-// The "LOG IN →" button. Label is optional; direction="back" puts the arrow on the left.
-
 type ArrowButtonProps = Omit<ThemedButtonProps, 'children' | 'style'> & {
   label?: string;
   direction?: 'forward' | 'back';
+  fontsize ?: number;
 };
 
-export function ArrowButton({ label, direction = 'forward', accessibilityLabel, ...rest }: ArrowButtonProps) {
+export function ArrowButton({ label, direction = 'forward', fontsize = 20, accessibilityLabel, ...rest }: ArrowButtonProps) {
   const { theme } = rest;
   const hasLabel = !!label;
   const back = direction === 'back';
@@ -97,7 +95,7 @@ export function ArrowButton({ label, direction = 'forward', accessibilityLabel, 
               <Text
                 style={{
                   fontFamily: fonts.label,
-                  fontSize: 20,
+                  fontSize: fontsize,
                   letterSpacing: 1.2,
                   textTransform: 'uppercase',
                   color: textColor,
@@ -145,8 +143,48 @@ export function IconButton({ icon, size = 48, variant = 'plain', shadowOffset = 
   );
 }
 
+type FilterChipProps = {
+  label: string;
+  selected: boolean;
+  onPress: () => void;
+  theme: Theme;
+};
 
-export function EyeButton({onPress, toggle}: 
+export function FilterChip({ label, selected, onPress, theme }: FilterChipProps) {
+  return (
+    <Pressable
+      onPress={onPress}
+      accessibilityRole="button"
+      accessibilityState={{ selected }}
+      accessibilityLabel={label}
+      style={({ pressed }) => ({
+        minHeight: 35,
+        paddingHorizontal: 12,
+        justifyContent: 'center',
+        alignItems: 'center',
+        backgroundColor: selected ? theme.ink : theme.card,
+        borderWidth: theme.borderWidth,
+        borderColor: theme.ink,
+        opacity: pressed && !selected ? 0.7 : 1,
+      })}
+    >
+      <Text
+        style={{
+          fontFamily: fonts.label,
+          fontSize: 13,
+          letterSpacing: 1,
+          textTransform: 'uppercase',
+          color: selected ? theme.card : theme.ink,
+        }}
+      >
+        {label}
+      </Text>
+    </Pressable>
+  );
+}
+
+
+export function EyeButton({onPress, toggle}:
     {onPress: ()=>void, toggle: boolean}) {
     return (
     <Pressable accessibilityLabel={toggle? 'Show Password': 'Hide Password'}

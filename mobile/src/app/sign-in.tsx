@@ -30,7 +30,7 @@ async function handleSubmit(data: {email: string,  password: string}, setErrors:
     const user: UserPayload = {
         id: '1',
         email: data.email,
-        role: "club"
+        role: "student"
     };
     // replace with call to backend
     const token = await simulateGenerateToken(user);

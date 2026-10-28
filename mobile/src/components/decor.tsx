@@ -43,6 +43,34 @@ export function CornerSquares({
   );
 }
 
+// Small black/white checkerboard strip.
+// Default 6 x 3 squares of 4px.
+export function CheckerStrip({
+  columns = 6,
+  rows = 3,
+  cell = 4,
+  ink = '#111111',
+  background = '#FFFFFF',
+}: { columns?: number; rows?: number; cell?: number; ink?: string; background?: string }) {
+  const squares = [];
+  for (let row = 0; row < rows; row++) {
+    for (let col = 0; col < columns; col++) {
+      // alternate per row and column, so neighbours are always opposite colors
+      if ((row + col) % 2 === 0) {
+        squares.push(<Rect key={`${col}-${row}`} x={col * cell} y={row * cell} width={cell} height={cell} fill={ink} />);
+      }
+    }
+  }
+  return (
+    <View {...hidden}>
+      <Svg width={columns * cell} height={rows * cell}>
+        <Rect x={0} y={0} width={columns * cell} height={rows * cell} fill={background} />
+        {squares}
+      </Svg>
+    </View>
+  );
+}
+
 // Diagonal black/white hazard stripes pinned to the bottom of the screen.
 // Use it as the last child of the screen with position: 'absolute', bottom: 0.
 export function StripeBand({
