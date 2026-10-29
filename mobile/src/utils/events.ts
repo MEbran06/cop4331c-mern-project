@@ -1,18 +1,25 @@
+import { number } from "zod";
+import { MOCK_EVENTS } from "./mockEvents";
+
 export interface EventSurvey {
   id: string;
   estimatedMinutes: number; 
+  questionCount: number;
   closesAt: string;        
   completed: boolean;   
 }
 
 export interface ClubEvent {
-  id: string;
-  title: string;
-  club: { id: string; name: string };
-  startsAt: string;        
-  endsAt: string;          
-  location?: string;        
-  survey?: EventSurvey;     
+    id: string;
+    title: string;
+    club: { id: string; name: string, 
+            followers: number, isFollowing: boolean };
+    startsAt: string;        
+    endsAt: string;          
+    location?: string;        
+    survey?: EventSurvey;  
+    subtitle ?: string;
+    description ?: string; 
 }
 
 export type EventStatus = 'live' | 'upcoming' | 'past';
@@ -39,10 +46,22 @@ export function formatDate(iso: string) {
 }
 
 
+// "Thu, Oct 22"
+export function formatLongDate(iso: string) {
+    return new Date(iso).toLocaleDateString('en-US', { weekday: 'short', month: 'short', day: 'numeric' });
+}
+
+// "7:00 - 9:30 PM", or "11:00 AM - 1:00 PM" when the event crosses noon/midnight
 export function formatTimeRange(startIso: string, endIso: string) {
     const options: Intl.DateTimeFormatOptions = { hour: 'numeric', minute: '2-digit' };
     const start = new Date(startIso).toLocaleTimeString('en-US', options);
     const end = new Date(endIso).toLocaleTimeString('en-US', options);
+    // splits "7:00 PM" into "7:00" and "PM"; \s also matches the narrow space some devices put before AM/PM
+    const startParts = start.match(/^(.+?)\s*([AP]M)$/i);
+    const endParts = end.match(/^(.+?)\s*([AP]M)$/i);
+    if (startParts && endParts && startParts[2] === endParts[2]) {
+        return `${startParts[1]} - ${end}`;
+    }
     return `${start} - ${end}`;
 }
 
@@ -53,4 +72,8 @@ export function formatEnded(endIso: string, now: Date = new Date()) {
     if (end >= startOfToday) return 'Ended today';
     if (end >= startOfYesterday) return 'Ended yesterday';
     return `Ended ${end.toLocaleDateString('en-US', { month: 'short', day: 'numeric' })}`;
+}
+
+export function getEventFromId(id: string) : ClubEvent | undefined {
+    return MOCK_EVENTS.find(event => event.id === id);
 }

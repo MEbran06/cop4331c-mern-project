@@ -4,7 +4,7 @@ import { useSession } from '@/contexts/ctx';
 import { PageContainer } from '@/components/PageContainer';
 import { ButtonHeader } from '@/components/ButtonHeader';
 import { useRouter } from 'expo-router';
-import { theme } from '../preferences';
+import { theme } from '@/app/preferences';
 import { CheckerStrip, DotGrid } from '@/components/decor';
 import { ScrollableSection } from '@/components/ScrollableSection';
 import { ThemedDisplayTitle } from '@/components/ThemedInputs';
@@ -81,7 +81,8 @@ export default function Dashboard() {
                         title={section.title}
                         events={eventsFor(section.status, section.sort)}
                         theme={theme}
-                        onEventPress={() => {}}/>
+                        onEventPress={(event) => router.push({ 
+                            pathname: "/(user_student)/event/[id]", params: {id: event.id}})}/>
                 ))}
         </ScrollableSection>
     </PageContainer>

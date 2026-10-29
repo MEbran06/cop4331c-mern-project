@@ -11,7 +11,7 @@ interface EventSectionProps {
     onEventPress: (event: ClubEvent) => void
 }
 
-// A heading ("HAPPENING NOW") with its event cards. Renders nothing when there are no events.
+// A heading with its event cards. Renders nothing when there are no events.
 export function EventSection({title, events, theme, onEventPress}: EventSectionProps) {
     const style = useMemo(() => stylesGen(theme), [theme]);
     if (events.length === 0) return null;
