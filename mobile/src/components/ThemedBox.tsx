@@ -12,14 +12,16 @@ interface ThemedBoxProps {
     text?: string,
     size: number,
     color?: string,
+    fontColor?: string,
+    hasShadow?: boolean,
     theme: Theme
 }
 
-export function ThemedBox({icon, text, size, color, theme}: ThemedBoxProps) {
+export function ThemedBox({icon, text, size, color, hasShadow=true, fontColor, theme}: ThemedBoxProps) {
 
-    const style = useMemo(() => styleGen(size, color, theme), [size, color, theme]);
+    const style = useMemo(() => styleGen(size, color, fontColor, theme), [size, color, fontColor, theme]);
     return (
-        <HardShadow>
+        <HardShadow color={hasShadow?theme.ink:"transparent"}>
             <View style={style.box}>
                 {!!icon && <Feather name={icon} size={size/2} color={theme.ink}/>}
                 {!!text && <Text style={style.boxedText}>{text}</Text>}
@@ -29,7 +31,7 @@ export function ThemedBox({icon, text, size, color, theme}: ThemedBoxProps) {
 
 }
 
-const styleGen = (size: number, color: string|undefined, theme: Theme) => StyleSheet.create({
+const styleGen = (size: number, color: string|undefined, fontColor: string|undefined, theme: Theme) => StyleSheet.create({
     box: {
         backgroundColor: color ? color : theme.hi,
         width: size,
@@ -42,7 +44,7 @@ const styleGen = (size: number, color: string|undefined, theme: Theme) => StyleS
     boxedText: {
         fontFamily: fonts.display,
         textTransform: "uppercase",
-        color: theme.card,
+        color: fontColor ? fontColor : theme.card,
         fontSize: size/2
     }
 });

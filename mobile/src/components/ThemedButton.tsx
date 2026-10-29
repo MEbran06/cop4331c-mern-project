@@ -23,6 +23,7 @@ export type ThemedButtonProps = {
   loading?: boolean;
   accessibilityLabel?: string;
   shadowOffset?: number;          // 5 for big buttons, 3 for small square ones
+  shawdowOn?: boolean;
   style?: StyleProp<ViewStyle>;   // size and layout of the button box
   children: React.ReactNode | ((state: ButtonState) => React.ReactNode);
 };
@@ -36,6 +37,7 @@ export function ThemedButton({
   loading = false,
   accessibilityLabel,
   shadowOffset = spacing.shadow,
+  shawdowOn = true,
   style,
   children,
 }: ThemedButtonProps) {
@@ -47,7 +49,7 @@ export function ThemedButton({
   return (
     // Disabled buttons sit flat (transparent shadow) but keep the same spacing,
     // so nothing jumps when the button enables.
-    <HardShadow offset={shadowOffset} color={inactive ? 'transparent' : theme.ink}>
+    <HardShadow offset={shadowOffset} color={inactive || !shawdowOn ? 'transparent' : theme.ink}>
       <Pressable
         onPress={onPress}
         disabled={inactive}
