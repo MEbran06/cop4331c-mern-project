@@ -2,13 +2,19 @@ const jwt = require('jsonwebtoken');
 const { JWT_SECRET, JWT_EXPIRES_IN } = require('../config/auth');
 
 // Creates the token sent back after a successful login or registration.
-// The token's "sub" (subject) claim holds the user's id.
-exports.createToken = (user) =>
-  jwt.sign({ sub: String(user._id) }, JWT_SECRET, { expiresIn: JWT_EXPIRES_IN });
+// The token's "sub" (subject) claim holds the user's id. The mobile app decodes
+// the token to know who is logged in, so it also carries id, email and role.
+exports.createToken = (account, role) =>
+  jwt.sign(
+    { sub: String(account._id), id: String(account._id), email: account.email, role },
+    JWT_SECRET,
+    { expiresIn: JWT_EXPIRES_IN }
+  );
 
 // Protects a route: the request must carry a valid token in the header
 //   Authorization: Bearer <token>
-// On success, req.userId holds the id of the logged-in user.
+// On success, req.userId holds the id of the logged-in user and req.userRole
+// whether they are a 'student' or a 'club'.
 exports.requireAuth = (req, res, next) => {
   const header = req.get('Authorization') || '';
   const [scheme, token] = header.split(' ');
@@ -20,6 +26,7 @@ exports.requireAuth = (req, res, next) => {
   try {
     const payload = jwt.verify(token, JWT_SECRET);
     req.userId = payload.sub;
+    req.userRole = payload.role;
     next();
   } catch {
     // Expired, tampered with, or signed with a different secret
