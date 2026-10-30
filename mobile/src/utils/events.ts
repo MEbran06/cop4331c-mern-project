@@ -1,12 +1,25 @@
-import { number } from "zod";
 import { MOCK_EVENTS } from "./mockEvents";
+
+// Matches surveyQuestionSchema in backend/db_schema.js
+export type SurveyQuestionType = 'text' | 'single_choice' | 'multiple_choice';
+
+export type SurveyStatusType = 'draft' | 'open' | 'closed'
+
+export interface SurveyQuestion {
+  id: string;
+  text: string;
+  type: SurveyQuestionType;
+  options: string[];        // empty for 'text' questions
+  required: boolean;
+}
 
 export interface EventSurvey {
   id: string;
-  estimatedMinutes: number; 
-  questionCount: number;
-  closesAt: string;        
-  completed: boolean;   
+  title: string;
+  questions: SurveyQuestion[];
+  closesAt?: string;         // when the survey stops accepting answers
+  status: SurveyStatusType;
+  completed: boolean;       // whether the user already answered
 }
 
 export interface ClubEvent {
@@ -32,7 +45,10 @@ export function getEventStatus(event: ClubEvent, now: Date = new Date()): EventS
 }
 
 export function isSurveyAvailable(event: ClubEvent, now: Date = new Date()): boolean {
-  return !!event.survey && !event.survey.completed && now < new Date(event.survey.closesAt);
+  return !!event.survey && 
+        !event.survey.completed && 
+        (!event.survey.closesAt || now < new Date(event.survey.closesAt)) && 
+        event.survey.status === 'open';
 }
 
 export function formatDate(iso: string) {
@@ -76,4 +92,11 @@ export function formatEnded(endIso: string, now: Date = new Date()) {
 
 export function getEventFromId(id: string) : ClubEvent | undefined {
     return MOCK_EVENTS.find(event => event.id === id);
+}
+
+// The backend doesn't store a time estimate, so work one out from the questions:
+// about 20 seconds per choice question and a minute per written answer.
+export function estimateSurveyMinutes(survey: EventSurvey): number {
+    const seconds = survey.questions.reduce((total, q) => total + (q.type === 'text' ? 60 : 20), 0);
+    return Math.max(1, Math.round(seconds / 60));
 }

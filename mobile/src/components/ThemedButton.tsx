@@ -16,7 +16,7 @@ export type ButtonState = {
 };
 
 export type ThemedButtonProps = {
-  onPress: () => void;
+  onPress?: (...args: any[]) => void;
   theme: Theme;
   variant?: ButtonVariant;
   disabled?: boolean;

@@ -8,11 +8,12 @@ interface EventSectionProps {
     title: string,
     events: ClubEvent[],
     theme: Theme,
-    onEventPress: (event: ClubEvent) => void
+    onEventPress: (event: ClubEvent) => void,
+    onTakeSurvey?: (eventId: string) => void
 }
 
 // A heading with its event cards. Renders nothing when there are no events.
-export function EventSection({title, events, theme, onEventPress}: EventSectionProps) {
+export function EventSection({title, events, theme, onEventPress, onTakeSurvey}: EventSectionProps) {
     const style = useMemo(() => stylesGen(theme), [theme]);
     if (events.length === 0) return null;
 
@@ -20,7 +21,8 @@ export function EventSection({title, events, theme, onEventPress}: EventSectionP
         <View style={style.section}>
             <Text style={style.heading}>{title}</Text>
             {events.map((event) => (
-                <EventCard key={event.id} event={event} theme={theme} onPress={() => onEventPress(event)}/>
+                <EventCard key={event.id} event={event} theme={theme} onPress={() => onEventPress(event)}
+                onTakeSurvey={onTakeSurvey ? () => onTakeSurvey(event.id): undefined}/>
             ))}
         </View>
     );

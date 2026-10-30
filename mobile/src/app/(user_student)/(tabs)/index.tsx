@@ -82,7 +82,11 @@ export default function Dashboard() {
                         events={eventsFor(section.status, section.sort)}
                         theme={theme}
                         onEventPress={(event) => router.push({ 
-                            pathname: "/(user_student)/event/[id]", params: {id: event.id}})}/>
+                            pathname: "/(user_student)/event/[id]", params: {id: event.id}})}
+                        
+                        onTakeSurvey={(eventId)=>router.push({ 
+                                pathname: "/(user_student)/survey/[eventId]", 
+                                params: {eventId: eventId}})}/>
                 ))}
         </ScrollableSection>
     </PageContainer>

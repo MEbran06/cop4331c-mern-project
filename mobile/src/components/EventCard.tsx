@@ -1,5 +1,5 @@
 import { fonts, spacing, Theme } from "@/constants/theme";
-import { ClubEvent, EventStatus, formatDate, formatEnded, formatTimeRange, getEventStatus, isSurveyAvailable } from "@/utils/events";
+import { ClubEvent, EventStatus, estimateSurveyMinutes, formatDate, formatEnded, formatTimeRange, getEventStatus, isSurveyAvailable } from "@/utils/events";
 import { useMemo } from "react";
 import { Pressable, StyleSheet, Text, View } from "react-native";
 import { Lucide } from "@react-native-vector-icons/lucide";
@@ -10,7 +10,7 @@ interface EventCardProps {
     event: ClubEvent,
     theme: Theme,
     onPress: () => void,
-    onTakeSurvey?: (surveyId: string) => void
+    onTakeSurvey?: (eventId: string) => void
 }
 
 export function EventCard({event, theme, onPress, onTakeSurvey}: EventCardProps) {
@@ -69,8 +69,8 @@ export function EventCard({event, theme, onPress, onTakeSurvey}: EventCardProps)
                     {showSurvey && (
                         <View style={style.surveyButton}>
                             <ArrowButton theme={theme} fontsize={16}
-                                label={`take survey · ${event.survey!.estimatedMinutes} min`}
-                                onPress={() => onTakeSurvey?.(event.survey!.id)}
+                                label={`take survey · ${estimateSurveyMinutes(event.survey!)} min`}
+                                onPress={onTakeSurvey}
                                 shadowOffset={1}/>
                         </View>
                     )}

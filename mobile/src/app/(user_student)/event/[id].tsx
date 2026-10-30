@@ -1,7 +1,7 @@
 import { PageContainer } from "@/components/PageContainer";
 import { StyleSheet, Text, View, Share, Button, Pressable } from "react-native";
-import { useLocalSearchParams, useRouter } from 'expo-router';
-import { ClubEvent, formatLongDate, formatTimeRange, getEventFromId, isSurveyAvailable } from "@/utils/events";
+import { ImperativeRouter, useLocalSearchParams, useRouter } from 'expo-router';
+import { ClubEvent, estimateSurveyMinutes, formatLongDate, formatTimeRange, getEventFromId, isSurveyAvailable } from "@/utils/events";
 import { DotGrid, HardShadow } from "@/components/decor";
 import { ButtonHeader } from "@/components/ButtonHeader";
 import { theme } from "@/app/preferences";
@@ -24,8 +24,11 @@ async function handleShared(event: ClubEvent | undefined) {
  
 }
 
-function handleGoToSurvey() {
+function handleGoToSurvey(event: ClubEvent, router: ImperativeRouter) {
 
+    router.push({ 
+        pathname: "/(user_student)/survey/[eventId]", 
+        params: {eventId: event.id}})
 }
 
 function handleToggleFollow(setter: (val: boolean)=>void, isFollowing: boolean) {
@@ -91,13 +94,13 @@ export default function EventDetailsPage() {
                             <View style={style.surveyTextColumn}>
                                 <Text style={style.surveyText}>share your feedback</Text>
                                 <Text style={style.surveyTextInfo}>
-                                    {event.club.name} wants to hear how it went. {event.survey!.questionCount} questions, about {event.survey!.estimatedMinutes} minutes.
+                                    {event.club.name} wants to hear how it went. {event.survey!.questions.length} questions, about {estimateSurveyMinutes(event.survey!)} {estimateSurveyMinutes(event.survey!) === 1 ? 'minute' : 'minutes'}.
                                 </Text>
                             </View>
                         </View>
                         <ArrowButton theme={theme} fontsize={16}
                                 label="take survey"
-                                onPress={handleGoToSurvey}/>
+                                onPress={() => handleGoToSurvey(event,router)}/>
                     </View>}
                     {
                         !!event.description &&
