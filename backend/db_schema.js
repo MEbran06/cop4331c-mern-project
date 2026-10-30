@@ -107,10 +107,55 @@ const surveySchema = new Schema(
   { timestamps: true }
 );
 
+const surveyAnswerSchema = new mongoose.Schema(
+    {
+        questionId: {
+            type: mongoose.Schema.Types.ObjectId,
+            required: true,
+        },
+        // Text answer: string; choice answer: string or string[].
+        value: {
+            type: mongoose.Schema.Types.Mixed,
+            required: true,
+        },
+    },
+    { _id: false }
+);
+
+const surveyResponseSchema = new mongoose.Schema(
+    {
+        survey: {
+            type: mongoose.Schema.Types.ObjectId,
+            ref: "Survey",
+            required: true,
+        },
+        student: {
+            type: mongoose.Schema.Types.ObjectId,
+            ref: "Student",
+            required: true,
+        },
+        answers: {
+            type: [surveyAnswerSchema],
+            required: true,
+            validate: {
+                validator: (answers) => answers.length > 0,
+                message: "A response must contain at least one answer.",
+            },
+        },
+    },
+    { timestamps: true }
+);
+
+// One submission per student per survey.
+surveyResponseSchema.index({ survey: 1, student: 1 }, { unique: true });
+
+
+
 module.exports = {
   Student: model("Student", studentSchema),
   Club: model("Club", clubSchema),
   Membership: model("Membership", membershipSchema),
   Event: model("Event", eventSchema),
   Survey: model("Survey", surveySchema),
+  SurveyResponse: model("SurveyResponse", surveyResponseSchema),
 };
