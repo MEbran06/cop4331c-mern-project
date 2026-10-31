@@ -1,7 +1,8 @@
 import { fonts, spacing, Theme } from "@/constants/theme";
 import { ReactNode, useMemo } from "react";
-import { StyleProp, StyleSheet, Text, TextInput, View, ViewStyle, TextInputProps } from "react-native";
+import { Pressable, StyleProp, StyleSheet, Text, TextInput, View, ViewStyle, TextInputProps } from "react-native";
 import { Highlight } from "./decor";
+import { Feather } from "@react-native-vector-icons/feather";
 
 
 interface ThemedTextInputProps extends TextInputProps {
@@ -18,6 +19,41 @@ export function ThemedTextInput({theme, right, style, ...restProps}: ThemedTextI
             <TextInput style={[styles.input, style]} 
                         {...restProps}/>
             {right}
+        </View>
+    );
+}
+
+// themed search input for searching clubs
+interface ThemedSearchInputProps extends TextInputProps {
+    theme: Theme
+};
+
+export function ThemedSearchInput({theme, style, value, onChangeText, ...restProps}: ThemedSearchInputProps) {
+    const styles = useMemo(() => {
+        return stylesGen(theme);
+    }, [theme]);
+    const hasText = !!value && value.length > 0;
+    return (
+        <View style={styles.wrapper}>
+            <View style={styles.searchIcon}>
+                <Feather name="search" size={20} color={theme.ink}/>
+            </View>
+            <TextInput style={[styles.input, style]}
+                        value={value}
+                        onChangeText={onChangeText}
+                        placeholderTextColor={theme.muted}
+                        returnKeyType="search"
+                        autoCorrect={false}
+                        autoCapitalize="none"
+                        {...restProps}/>
+            {hasText && !!onChangeText && (
+                <Pressable style={styles.clearButton}
+                    onPress={() => onChangeText('')}
+                    accessibilityRole="button"
+                    accessibilityLabel="Clear search">
+                    <Feather name="x" size={18} color={theme.ink}/>
+                </Pressable>
+            )}
         </View>
     );
 }
@@ -117,6 +153,19 @@ const stylesGen = (theme: Theme, size: number = 60) => {
             borderWidth: theme.borderWidth, 
             backgroundColor: theme.card,
             borderColor: theme.ink
+        },
+        // square cell for the magnifying glass, with a divider line on its right
+        searchIcon: {
+            width: 50,
+            justifyContent: "center",
+            alignItems: "center",
+            borderRightWidth: theme.borderWidth,
+            borderRightColor: theme.ink
+        },
+        clearButton: {
+            width: 44,
+            justifyContent: "center",
+            alignItems: "center"
         },
         customText: {
             fontFamily: fonts.label,

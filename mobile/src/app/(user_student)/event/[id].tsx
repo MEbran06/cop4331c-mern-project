@@ -1,7 +1,7 @@
 import { PageContainer } from "@/components/PageContainer";
 import { StyleSheet, Text, View, Share, Button, Pressable } from "react-native";
 import { ImperativeRouter, useLocalSearchParams, useRouter } from 'expo-router';
-import { ClubEvent, estimateSurveyMinutes, formatLongDate, formatTimeRange, getEventFromId, isSurveyAvailable } from "@/utils/events";
+import { Club, ClubEvent, estimateSurveyMinutes, formatLongDate, formatTimeRange, getEventFromId, isSurveyAvailable } from "@/utils/events";
 import { DotGrid, HardShadow } from "@/components/decor";
 import { ButtonHeader } from "@/components/ButtonHeader";
 import { theme } from "@/app/preferences";
@@ -13,6 +13,8 @@ import { ArrowButton, ThemedButton } from "@/components/ThemedButton";
 import { ThemedBox } from "@/components/ThemedBox";
 import { Feather } from "@react-native-vector-icons/feather";
 import { useState } from "react";
+import { ClubRow } from "@/components/clubRow";
+import { setClubFollowing } from "@/utils/mockEvents";
 
 async function handleShared(event: ClubEvent | undefined) {
 
@@ -31,14 +33,15 @@ function handleGoToSurvey(event: ClubEvent, router: ImperativeRouter) {
         params: {eventId: event.id}})
 }
 
-function handleToggleFollow(setter: (val: boolean)=>void, isFollowing: boolean) {
+async function handleToggleFollow(club: Club,setter: (val: boolean)=>void, isFollowing: boolean) {
     setter(!isFollowing);
-}
 
-function getInitials(name: string) {
-    const words = name.trim().split(/\s+/);
-    const initials = words.length > 1 ? words[0][0] + words[1][0] : words[0].slice(0, 2);
-    return initials.toUpperCase();
+     try {
+        await setClubFollowing(club.id, !isFollowing);
+    } catch {
+        // the request failed: put the button back the way it was
+        setter(isFollowing);
+    }
 }
 
 export default function EventDetailsPage() {
@@ -119,29 +122,12 @@ export default function EventDetailsPage() {
                     }
                     <View style={{marginTop: spacing.gap}}>
                         <Text style={style.sectionLabel}>hosted by</Text>
-                        <View style={style.clubInfoContainer}>
-                            <ThemedBox text={getInitials(event.club.name)} size={48} theme={theme} fontColor={theme.ink} hasShadow={false}/>
-                        
-                            <View style={style.clubText}>
-                                <Text style={style.clubName} numberOfLines={1}>{event.club.name}</Text>
-                                <Text style={style.clubFollowers}>
-                                    {event.club.followers} {event.club.followers === 1 ? 'follower' : 'followers'}
-                                </Text>
-                            </View>
-                            <ThemedButton
-                                onPress={()=>handleToggleFollow(setIsFollowing, isFollowing)} theme={theme}
-                                variant="plain"
-                                shadowOffset={3}
-                                shawdowOn={!isFollowing}
-                                accessibilityLabel={isFollowing ? `Unfollow ${event.club.name}` : `Follow ${event.club.name}`}
-                                style={[style.followButton, isFollowing && style.followButtonActive]}>
-                                <Feather name={isFollowing ? 'check' : 'plus'} size={16}
-                                    color={isFollowing ? theme.card : theme.ink}/>
-                                <Text style={[style.followText, isFollowing && style.followTextActive]}>
-                                    {isFollowing ? 'following' : 'follow'}
-                                </Text>
-                            </ThemedButton>
-                        </View>
+                        <ClubRow 
+                            theme={theme} clubInfo={event.club} 
+                            isFollowing={isFollowing} 
+                            onFollowButtonPress={
+                                ()=>handleToggleFollow(event.club, setIsFollowing, isFollowing)}
+                            />
                     </View>
             </ScrollableSection>
         </PageContainer>
@@ -203,49 +189,6 @@ const style = StyleSheet.create({
         textTransform: 'uppercase',
         color: theme.muted,
         marginVertical: 5
-    },
-    // HOSTED BY box: initials tile | name + followers | follow button
-    clubInfoContainer: {
-        flexDirection: "row",
-        alignItems: "center",
-        gap: 12,
-        padding: 14,
-        borderWidth: theme.borderWidth,
-        borderColor: theme.ink,
-        backgroundColor: theme.card
-    },
-    clubText: {
-        flex: 1,
-        gap: 2
-    },
-    clubName: {
-        fontFamily: fonts.bodyHeavy,
-        fontSize: 17,
-        color: theme.ink
-    },
-    clubFollowers: {
-        fontFamily: fonts.body,
-        fontSize: 13,
-        color: theme.muted
-    },
-    followButton: {
-        alignItems: "center",
-        gap: 6,
-        paddingHorizontal: 14,
-        paddingVertical: 10
-    },
-    followButtonActive: {
-        backgroundColor: theme.ink
-    },
-    followText: {
-        fontFamily: fonts.label,
-        fontSize: 14,
-        letterSpacing: 1,
-        textTransform: 'uppercase',
-        color: theme.ink
-    },
-    followTextActive: {
-        color: theme.card
     },
     surveyText: {
         fontFamily: fonts.label,

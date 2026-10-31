@@ -1,7 +1,7 @@
 // src/utils/mockEvents.ts
 // Sample events to build the feed before the backend exists.
 // Dates are relative to "now", so there's always one live, some past and some upcoming event.
-import { ClubEvent } from './events';
+import { Club, ClubEvent } from './events';
 
 const HOUR = 60 * 60 * 1000;
 
@@ -9,13 +9,76 @@ function hoursFromNow(hours: number): string {
   return new Date(Date.now() + hours * HOUR).toISOString();
 }
 
+// Each club is defined once; the events below point at these same objects,
+// so a club's name, followers and isFollowing always match everywhere.
+const clubs = {
+  chess: {
+    id: 'club-chess',
+    name: 'Chess Club',
+    followers: 112,
+    isFollowing: true,
+    description: 'Casual and rated play every week. All levels welcome, from first-timers to tournament regulars.',
+  },
+  film: {
+    id: 'club-film',
+    name: 'Film Society',
+    followers: 48,
+    isFollowing: true,
+    description: 'Screenings, discussions and the occasional student short. Popcorn is always on us.',
+  },
+  outdoors: {
+    id: 'club-outdoors',
+    name: 'Outdoors Club',
+    followers: 203,
+    isFollowing: true,
+    description: 'Hikes, camping trips and kayaking around campus and beyond. Gear available to borrow.',
+  },
+  music: {
+    id: 'club-music',
+    name: 'Music Collective',
+    followers: 87,
+    isFollowing: false,
+    description: 'Open mics, jam sessions and karaoke nights for musicians and listeners alike.',
+  },
+  robotics: {
+    id: 'club-robotics',
+    name: 'Robotics Club',
+    followers: 64,
+    isFollowing: true,
+    description: 'Build, code and compete. Hands-on workshops for beginners and a competition team.',
+  },
+  debate: {
+    id: 'club-debate',
+    name: 'Debate Society',
+    followers: 31,
+    isFollowing: false,
+  },
+  // clubs without events in MOCK_EVENTS, for testing lists that aren't tied to the feed
+  photo: {
+    id: 'club-photo',
+    name: 'Photography Club',
+    followers: 76,
+    isFollowing: true,
+    description: 'Photo walks, editing workshops and a yearly exhibition in the student union.',
+  },
+  boardGames: {
+    id: 'club-board-games',
+    name: 'Board Game Guild',
+    followers: 1,
+    isFollowing: false,
+    description: 'Weekly game nights with a shelf of over 100 games. Bring a friend or make one.',
+  },
+} satisfies Record<string, Club>;
+
+export const MOCK_CLUBS: Club[] = Object.values(clubs);
+
 export const MOCK_EVENTS: ClubEvent[] = [
   {
     // live: started an hour ago, ends in an hour
     // survey open with no closesAt -> stays open until the club closes it -> shows the survey button
     id: 'evt-1',
     title: 'Blitz Night',
-    club: { id: 'club-chess', name: 'Chess Club', followers: 112, isFollowing: true },
+    club: clubs.chess,
     startsAt: hoursFromNow(-1),
     endsAt: hoursFromNow(1),
     location: 'Library, Room 104',
@@ -41,7 +104,7 @@ export const MOCK_EVENTS: ClubEvent[] = [
     // ended last night, survey open and not answered yet -> shows the survey button
     id: 'evt-2',
     title: 'Movie Night',
-    club: { id: 'club-film', name: 'Film Society', followers: 48, isFollowing: true },
+    club: clubs.film,
     startsAt: hoursFromNow(-20),
     endsAt: hoursFromNow(-17),
     location: 'Student Union Theater',
@@ -82,7 +145,7 @@ export const MOCK_EVENTS: ClubEvent[] = [
     // past, survey already answered -> no button
     id: 'evt-3',
     title: 'Sunrise Hike',
-    club: { id: 'club-outdoors', name: 'Outdoors Club', followers: 203, isFollowing: true },
+    club: clubs.outdoors,
     startsAt: hoursFromNow(-5 * 24),
     endsAt: hoursFromNow(-5 * 24 + 4),
     location: 'North Trailhead',
@@ -115,7 +178,7 @@ export const MOCK_EVENTS: ClubEvent[] = [
     // past, survey closed automatically when closesAt passed -> no button
     id: 'evt-4',
     title: 'Open Mic',
-    club: { id: 'club-music', name: 'Music Collective', followers: 87, isFollowing: false },
+    club: clubs.music,
     startsAt: hoursFromNow(-9 * 24),
     endsAt: hoursFromNow(-9 * 24 + 3),
     location: 'Student Union Café',
@@ -151,7 +214,7 @@ export const MOCK_EVENTS: ClubEvent[] = [
     // this is here to check the app hides one if it ever does.
     id: 'evt-5',
     title: 'Robot Build Workshop',
-    club: { id: 'club-robotics', name: 'Robotics Club', followers: 64, isFollowing: true },
+    club: clubs.robotics,
     startsAt: hoursFromNow(2 * 24),
     endsAt: hoursFromNow(2 * 24 + 2),
     location: 'Engineering Lab 3',
@@ -176,7 +239,7 @@ export const MOCK_EVENTS: ClubEvent[] = [
     // past, club closed the survey early (closesAt is still in the future) -> no button
     id: 'evt-7',
     title: 'Karaoke Night',
-    club: { id: 'club-music', name: 'Music Collective', followers: 87, isFollowing: false },
+    club: clubs.music,
     startsAt: hoursFromNow(-3 * 24),
     endsAt: hoursFromNow(-3 * 24 + 3),
     location: 'Student Union Café',
@@ -202,8 +265,31 @@ export const MOCK_EVENTS: ClubEvent[] = [
     // upcoming, no location, subtitle or description -> details page should handle the missing fields
     id: 'evt-6',
     title: 'Debate Practice',
-    club: { id: 'club-debate', name: 'Debate Society', followers: 31, isFollowing: false },
+    club: clubs.debate,
     startsAt: hoursFromNow(4 * 24),
     endsAt: hoursFromNow(4 * 24 + 1.5),
   },
 ];
+
+// ---------------------------------------------------------------------------
+// Mock API: stands in for the backend until the real endpoints exist.
+// MOCK_CLUBS plays the part of the database, so changes made here show up
+// the next time a screen "fetches". Replace these with real requests later.
+
+// GET followed clubs. Returns copies, like a real response would, so screens
+// can't accidentally change the "database" by editing what they received.
+export async function fetchFollowedClubs(): Promise<Club[]> {
+  return MOCK_CLUBS.filter((club) => club.isFollowing).map((club) => ({ ...club }));
+}
+
+// POST / DELETE follow. Saves the change right away, like the real request will.
+export async function setClubFollowing(clubId: string, following: boolean): Promise<void> {
+  const club = MOCK_CLUBS.find((c) => c.id === clubId);
+  if (!club || club.isFollowing === following) return;
+  club.isFollowing = following;
+  club.followers += following ? 1 : -1;
+}
+
+export async function searchClubs(search: string): Promise<Club[]> {
+    return MOCK_CLUBS.filter(club=>club.name.toLowerCase().includes(search.trim())).map((club) => ({ ...club }))
+}

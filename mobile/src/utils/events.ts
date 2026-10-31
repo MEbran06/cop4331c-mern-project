@@ -5,6 +5,14 @@ export type SurveyQuestionType = 'text' | 'single_choice' | 'multiple_choice';
 
 export type SurveyStatusType = 'draft' | 'open' | 'closed'
 
+export interface Club {
+    id: string; 
+    name: string, 
+    followers: number, 
+    isFollowing: boolean,
+    description?: string,
+}
+
 export interface SurveyQuestion {
   id: string;
   text: string;
@@ -25,8 +33,7 @@ export interface EventSurvey {
 export interface ClubEvent {
     id: string;
     title: string;
-    club: { id: string; name: string, 
-            followers: number, isFollowing: boolean };
+    club: Club;
     startsAt: string;        
     endsAt: string;          
     location?: string;        
