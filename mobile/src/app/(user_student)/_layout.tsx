@@ -7,7 +7,6 @@ export default function StudentLayout() {
         <Stack.Screen name="(tabs)" />
         <Stack.Screen name="event/[id]" />
         <Stack.Screen name="survey/[eventId]" />
-        <Stack.Screen name="club/[id]"/>
     </Stack>
 
   );

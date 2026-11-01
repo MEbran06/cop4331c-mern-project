@@ -7,7 +7,7 @@ import {Feather} from "@react-native-vector-icons/feather";
 import { Club } from "@/utils/events";
 
 
-function getInitials(name: string) {
+export function getInitials(name: string) {
     const words = name.trim().split(/\s+/);
     const initials = words.length > 1 ? words[0][0] + words[1][0] : words[0].slice(0, 2);
     return initials.toUpperCase();

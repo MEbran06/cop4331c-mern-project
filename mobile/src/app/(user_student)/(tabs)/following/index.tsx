@@ -10,25 +10,7 @@ import { Dispatch, SetStateAction, useCallback, useEffect, useState } from 'reac
 import { StyleSheet, Text, View } from 'react-native';
 import { DotGrid, HardShadow } from '@/components/decor';
 import { fonts, spacing } from '@/constants/theme';
-
-async function handleToggleFollow(club: Club, followed: string[],
-        setFollowed: Dispatch<SetStateAction<string[]>>) {
-    const follow = !followed.includes(club.id);
-
-    // update the button right away
-    setFollowed((prevItems: string[]) =>
-        follow ? [...prevItems, club.id] : prevItems.filter((clubId) => clubId !== club.id)
-    );
-
-    try {
-        await setClubFollowing(club.id, follow);
-    } catch {
-        // the request failed: put the button back the way it was
-        setFollowed((prevItems: string[]) =>
-            follow ? prevItems.filter((clubId) => clubId !== club.id) : [...prevItems, club.id]
-        );
-    }
-}
+import { handleToggleFollow } from '@/utils/utils';
 
 export default function FollowingPage() {
     const [followed, setFollowed] = useState<string[]>([]);
@@ -98,7 +80,7 @@ export default function FollowingPage() {
                                 onFollowButtonPress={()=>handleToggleFollow(club, followed, setFollowed)}
                                 style={[style.row, index > 0 && style.rowDivider]}
                                 onBoxPress={()=>router.push({
-                                    pathname: '/(user_student)/(club)/[id]',
+                                    pathname: '/(user_student)/(tabs)/following/club/[id]',
                                     params: {id: club.id}
                                 })}/>
                         ))}

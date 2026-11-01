@@ -126,9 +126,9 @@ export function ThemedDisplayTitle({text, highlight, highlightedFirst=false, the
     }, [theme, fontSize]);
     return (
         <View style={[{marginTop: spacing.gap}, (inline? {flexDirection:"row", alignItems:"center"}: {})]}>
-            {highlightedFirst && <Highlight background={theme.hi} textStyle={styles.DisplayText}>{highlight}</Highlight>}
+            {highlightedFirst && !!highlight && <Highlight background={theme.hi} textStyle={styles.DisplayText}>{highlight}</Highlight>}
             <Text style={[styles.DisplayText, (inline ? {marginHorizontal: 10}:{})]}>{text}</Text>
-            {!highlightedFirst && <Highlight background={theme.hi} textStyle={styles.DisplayText}>{highlight}</Highlight>}
+            {!highlightedFirst && !!highlight && <Highlight background={theme.hi} textStyle={styles.DisplayText}>{highlight}</Highlight>}
         </View>
     );
 }

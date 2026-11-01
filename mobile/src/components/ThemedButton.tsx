@@ -4,6 +4,8 @@ import { Pressable, StyleProp, Text, View, ViewStyle } from 'react-native';
 import { ArrowLeftIcon, ArrowRightIcon, EyeIcon, EyeOffIcon } from './icons';
 import { HardShadow } from './decor';
 import { Theme, fonts, spacing } from '../constants/theme';
+import Feather from '@react-native-vector-icons/feather';
+import { theme } from '@/app/preferences';
 
 // 'primary' = orange (Log in, Publish), 'plain' = white (bell, back, secondary actions)
 export type ButtonVariant = 'primary' | 'plain';
@@ -25,7 +27,7 @@ export type ThemedButtonProps = {
   shadowOffset?: number;          // 5 for big buttons, 3 for small square ones
   shawdowOn?: boolean;
   style?: StyleProp<ViewStyle>;   // size and layout of the button box
-  children: React.ReactNode | ((state: ButtonState) => React.ReactNode);
+  children?: React.ReactNode | ((state: ButtonState) => React.ReactNode);
 };
 
 // The shared shell: border, background, hard shadow, press effect, disabled/loading.
@@ -200,4 +202,56 @@ export function EyeButton({onPress, toggle}:
         onPress={onPress}>
         {toggle ? <EyeIcon/> : <EyeOffIcon/>}
     </Pressable>);
+}
+
+
+type FollowButtonProps = Omit<ThemedButtonProps, 'children' | 'style'> & {
+    isFollowing: boolean;
+    onPress : ()=>void;
+};
+
+export function FollowButton({isFollowing, onPress, ...rest}: FollowButtonProps) {
+    return (
+        <View>
+        <ThemedButton theme={rest.theme}
+            accessibilityLabel={isFollowing?"unfollow": "follow"}
+            style={{ minHeight: spacing.buttonHeight, flexDirection: "row" }}
+            variant={isFollowing ? "plain":"primary"}
+            onPress={onPress}>
+            <View
+                style={{
+                width: spacing.arrowBlock,
+                alignItems: 'center',
+                justifyContent: 'center',
+                backgroundColor: rest.theme.arrowBg,
+                borderLeftWidth: rest.theme.borderWidth,
+                borderRightWidth: rest.theme.borderWidth,
+                borderColor: rest.theme.ink,
+                }}
+            >
+                <Feather name='plus' size={20} color={theme.card}/>
+            </View>
+            <View style={{ flex: 1, alignItems: 'center', justifyContent: 'center', paddingHorizontal: 12 }}>
+                <Text style={{
+                  fontFamily: fonts.label,
+                  fontSize: 20,
+                  letterSpacing: 1.2,
+                  textTransform: 'uppercase',
+                  color: rest.theme.ink,
+                }}>
+                    {isFollowing?"unfollow": "follow"}
+                </Text>
+            </View>
+        </ThemedButton>
+        <Text style={{
+            fontFamily: fonts.body,
+            fontSize: 14,
+            color: theme.muted,
+            marginTop: 7
+        }}>
+            {isFollowing? "Follow to see their events in your feed and get their surveys." :
+                        "Their events now show up in your feed. Tap again to unfollow."}
+        </Text>
+        </View>
+    );
 }

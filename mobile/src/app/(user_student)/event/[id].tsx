@@ -15,6 +15,7 @@ import { Feather } from "@react-native-vector-icons/feather";
 import { useState } from "react";
 import { ClubRow } from "@/components/clubRow";
 import { setClubFollowing } from "@/utils/mockEvents";
+import { handleSingleToggleFollow } from "@/utils/utils";
 
 async function handleShared(event: ClubEvent | undefined) {
 
@@ -31,17 +32,6 @@ function handleGoToSurvey(event: ClubEvent, router: ImperativeRouter) {
     router.push({ 
         pathname: "/(user_student)/survey/[eventId]", 
         params: {eventId: event.id}})
-}
-
-async function handleToggleFollow(club: Club,setter: (val: boolean)=>void, isFollowing: boolean) {
-    setter(!isFollowing);
-
-     try {
-        await setClubFollowing(club.id, !isFollowing);
-    } catch {
-        // the request failed: put the button back the way it was
-        setter(isFollowing);
-    }
 }
 
 export default function EventDetailsPage() {
@@ -126,7 +116,7 @@ export default function EventDetailsPage() {
                             theme={theme} clubInfo={event.club} 
                             isFollowing={isFollowing} 
                             onFollowButtonPress={
-                                ()=>handleToggleFollow(event.club, setIsFollowing, isFollowing)}
+                                ()=>handleSingleToggleFollow(event.club, setIsFollowing, isFollowing)}
                             />
                     </View>
             </ScrollableSection>

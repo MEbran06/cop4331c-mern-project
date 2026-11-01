@@ -293,3 +293,15 @@ export async function setClubFollowing(clubId: string, following: boolean): Prom
 export async function searchClubs(search: string): Promise<Club[]> {
     return MOCK_CLUBS.filter(club=>club.name.toLowerCase().includes(search.trim())).map((club) => ({ ...club }))
 }
+
+export async function searchClubById(id: string): Promise<Club|void> {
+    const found = MOCK_CLUBS.find(club=>club.id===id)
+    if (found)
+        return {...found}
+    else
+        return;
+}
+
+export async function getClubEvents(clubId: string): Promise<ClubEvent[]> {
+    return MOCK_EVENTS.filter(event=>event.club.id===clubId).map((club) => ({ ...club }))
+}
