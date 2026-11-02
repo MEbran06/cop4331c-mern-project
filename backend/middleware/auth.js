@@ -2,11 +2,9 @@ const jwt = require('jsonwebtoken');
 const { JWT_SECRET, JWT_EXPIRES_IN } = require('../config/auth');
 
 // Creates the token sent back after a successful login or registration.
-// The token's "sub" (subject) claim holds the user's id. The mobile app decodes
-// the token to know who is logged in, so it also carries id, email and role.
 exports.createToken = (account, role) =>
   jwt.sign(
-    { sub: String(account._id), id: String(account._id), email: account.email, role },
+    { id: String(account._id), email: account.email, role },
     JWT_SECRET,
     { expiresIn: JWT_EXPIRES_IN }
   );
@@ -25,7 +23,7 @@ exports.requireAuth = (req, res, next) => {
 
   try {
     const payload = jwt.verify(token, JWT_SECRET);
-    req.userId = payload.sub;
+    req.userId = payload.id;
     req.userRole = payload.role;
     next();
   } catch {

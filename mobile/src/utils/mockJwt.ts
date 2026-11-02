@@ -1,8 +1,8 @@
 // src/utils/mockJwt.ts
 import { jwtDecode, type JwtPayload } from 'jwt-decode';
-import { UserProfile } from '@/contexts/ctx';
+import { AuthUser } from '@/contexts/ctx';
 
-export interface UserPayload extends UserProfile, JwtPayload {}
+export interface UserPayload extends AuthUser, JwtPayload {}
 
 // Hermes has no WebCrypto (crypto.subtle), so we can't HMAC-sign here.
 // That's fine: signing/verifying belongs on the server. The app only needs a

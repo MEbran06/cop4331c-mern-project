@@ -2,7 +2,7 @@ import { use, useMemo, createContext, type PropsWithChildren } from 'react';
 import { jwtDecode } from 'jwt-decode';
 import { useStorageState, setStorageItemAsync } from '../hooks/useStorageState'
 
-export interface UserProfile {
+export interface AuthUser {
   id: string;
   email: string;
   role?: string;
@@ -13,7 +13,7 @@ const AuthContext = createContext<{
   signIn:  (token: string, refreshToken?: string) => Promise<void>;
   signOut: () =>  Promise<void>;
   session?: string | null; // access token
-  user: UserProfile | null; // extracted profile from the token
+  user: AuthUser | null; // extracted profile from the token
   isLoading: boolean;
 } | null>(null);
 
@@ -30,10 +30,16 @@ export function useSession() {
 export function SessionProvider({ children }: PropsWithChildren) {
   const [[isLoading, session], setSession] = useStorageState('session');
   // Derive the profile from the stored token so it survives app restarts.
-  const user = useMemo<UserProfile | null>(() => {
+  const user = useMemo<AuthUser | null>(() => {
     if (!session) return null;
     try {
-      return jwtDecode<UserProfile>(session);
+        const decoded = jwtDecode<AuthUser & { exp?: number }>(session);
+
+        // sends user back to sign in if token expired
+        if (decoded.exp && decoded.exp * 1000 < Date.now()) 
+            return null;
+        
+        return decoded;
     } catch {
       return null;
     }

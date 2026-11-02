@@ -20,21 +20,35 @@ const loginFormSchema = z.object({
     password: z.string().min(1, 'Password is required')
 });
 
-async function handleSubmit(data: {email: string,  password: string}, setErrors: CallableFunction): Promise<string> {
+async function handleSubmit(
+    data: {email: string,  password: string}, 
+    setErrors: CallableFunction,
+    SetLoginError: (val?:string)=>void): Promise<string> {
+    
+    setErrors(undefined);
+    SetLoginError(undefined);
+
     const result = loginFormSchema.safeParse(data);
+
     if (!result.success) {
         const flat = result.error.flatten();
         setErrors(flat.fieldErrors);
         return '';
     }
-    const user: UserPayload = {
-        id: '1',
-        email: data.email,
-        role: "student"
-    };
-    // replace with call to backend
-    const token = await simulateGenerateToken(user);
-    return token;
+    
+    const res = await fetch(`${process.env.EXPO_PUBLIC_API_URL}/auth/login`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(result.data),
+    });
+    const body = await res.json();
+    if (!res.ok) {
+        // display error
+        SetLoginError(body.error)
+        return '';
+    }
+    return body.token;
+
 }
 
 export default function SignIn() {
@@ -42,7 +56,9 @@ export default function SignIn() {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [errors, setErrors] = useState<{email?: string[], password?: string[]}>();
+  const [loginError, SetLoginError] = useState<string>();
   const [isPasswordHidden, setPasswordHidden] = useState(true);
+  const [submitting, setSubmitting] = useState(false);
   const router = useRouter();
   return (
     <PageContainer>
@@ -69,12 +85,17 @@ export default function SignIn() {
                     onChangeText={setPassword}
                     right={<EyeButton toggle={isPasswordHidden} onPress={() => setPasswordHidden(!isPasswordHidden)}/>}/>
             </ThemedInputContainer>
+            {!!loginError && <Text style={styles.fieldError}>*{loginError}</Text>}
             <View style={{marginTop: 20,}}>
             <ArrowButton label='Log In' theme={theme}
                 onPress={async () => {
-                    const token = await handleSubmit({email, password}, setErrors);
-                    if (!!token) 
-                        signIn(token); // sign in
+                    setSubmitting(true);
+                    try {
+                        const token = await handleSubmit({email, password}, setErrors, SetLoginError);
+                        if (token) signIn(token);
+                    } finally {
+                        setSubmitting(false);   // always runs, even if the request throws
+                    }
                 }}>
             </ArrowButton>
             </View>
@@ -103,6 +124,14 @@ const styles = StyleSheet.create({
         color: theme.ink, 
         borderBottomColor: theme.ink, 
         marginRight: 15
+    },
+    fieldError: {
+        fontFamily: fonts.label,
+        fontSize: 12,
+        letterSpacing: 1,
+        textTransform: 'uppercase',
+        color: theme.primaryText,
+        marginTop: 6,
     }
 
     

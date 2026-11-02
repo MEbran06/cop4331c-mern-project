@@ -47,7 +47,6 @@ function eventsFor(status: EventStatus, sort: 'asc' | 'desc'): ClubEvent[] {
 
 
 export default function Dashboard() {
-  const { signOut } = useSession();
   const router = useRouter();
   const [filter, setFilter] = useState<Filter>('all');
   const style = useMemo(() => stylesGen(theme), [theme]);
