@@ -51,7 +51,7 @@ const styleGen = (theme: Theme) => StyleSheet.create({
     name: {
         fontFamily: fonts.display,
         fontSize: 28,
-        lineHeight: 32,
+        lineHeight: 40,
         textTransform: "uppercase",
         color: theme.ink,
         includeFontPadding: false
