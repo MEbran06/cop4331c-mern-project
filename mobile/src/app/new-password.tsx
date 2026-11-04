@@ -2,7 +2,7 @@ import { ButtonHeader } from "@/components/ButtonHeader";
 import { PageContainer } from "@/components/PageContainer";
 import { useRouter } from "expo-router";
 import { Text, View } from "react-native";
-import { theme } from "./preferences";
+import { useTheme } from "@/contexts/theme";
 import { ScrollableSection } from "@/components/ScrollableSection";
 import { ThemedDisplayTitle, ThemedInputContainer, ThemedTextInput } from "@/components/ThemedInputs";
 import { fonts, spacing } from "@/constants/theme";
@@ -44,6 +44,7 @@ async function handleSubmit(data: {password: string, passwordConfirm: string}, r
 }
 
 export default function NewPassword() {
+    const { theme } = useTheme();
     const router = useRouter();
     const { signIn } = useSession();
     const [isPasswordHidden, setPasswordHidden] = useState(true);
@@ -66,7 +67,7 @@ export default function NewPassword() {
                         secureTextEntry={isPasswordHidden}
                         placeholder='Password' value={password}
                         onChangeText={setPassword}
-                        right={<EyeButton toggle={isPasswordHidden} onPress={() => setPasswordHidden(!isPasswordHidden)}/>}/>
+                        right={<EyeButton theme={theme} toggle={isPasswordHidden} onPress={() => setPasswordHidden(!isPasswordHidden)}/>}/>
                 </ThemedInputContainer>
                 <ThemedInputContainer style={{marginTop:spacing.gap}} theme={theme} label="confirm password" error={errors?.passwordConfirm?.at(0)}>
                     <ThemedTextInput theme={theme}

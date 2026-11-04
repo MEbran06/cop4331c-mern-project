@@ -3,12 +3,12 @@ import { StyleSheet, Text, View } from 'react-native';
 import { PageContainer } from '@/components/PageContainer';
 import { ButtonHeader } from '@/components/ButtonHeader';
 import { useRouter } from 'expo-router';
-import { theme } from '@/app/preferences';
+import { useTheme } from '@/contexts/theme';
 import { CheckerStrip, DotGrid } from '@/components/decor';
 import { ScrollableSection } from '@/components/ScrollableSection';
 import { ThemedDisplayTitle } from '@/components/ThemedInputs';
-import { fonts, spacing } from '@/constants/theme';
-import { useState } from 'react';
+import { fonts, spacing, Theme } from '@/constants/theme';
+import { useState, useMemo } from 'react';
 import { FilterChip } from '@/components/ThemedButton';
 
 // for testing
@@ -46,6 +46,8 @@ function eventsFor(status: EventStatus, sort: 'asc' | 'desc'): ClubEvent[] {
 
 
 export default function Dashboard() {
+  const { theme } = useTheme();
+  const style = useMemo(() => styleGen(theme), [theme]);
   const router = useRouter();
   const [filter, setFilter] = useState<Filter>('all');
 
@@ -91,7 +93,7 @@ export default function Dashboard() {
   );
 }
 
-const style = StyleSheet.create({
+const styleGen = (theme: Theme) => StyleSheet.create({
     clubTag: {
         backgroundColor: theme.hi,
         borderWidth: 3,

@@ -1,4 +1,4 @@
-import { theme } from '@/app/preferences';
+import { useTheme } from '@/contexts/theme';
 import { ClubRow } from '@/components/clubRow';
 import { PageContainer } from '@/components/PageContainer';
 import { ScrollableSection } from '@/components/ScrollableSection';
@@ -6,13 +6,15 @@ import { ThemedDisplayTitle, ThemedInputContainer, ThemedSearchInput } from '@/c
 import { Club } from '@/utils/events';
 import { fetchFollowedClubs, searchClubs } from '@/utils/mockEvents';
 import { useFocusEffect, useRouter } from 'expo-router';
-import { useCallback, useEffect, useState } from 'react';
+import { useCallback, useEffect, useState, useMemo } from 'react';
 import { StyleSheet, Text, View } from 'react-native';
 import { DotGrid, HardShadow } from '@/components/decor';
-import { fonts, spacing } from '@/constants/theme';
+import { fonts, spacing, Theme } from '@/constants/theme';
 import { handleToggleFollow } from '@/utils/utils';
 
 export default function FollowingPage() {
+    const { theme } = useTheme();
+    const style = useMemo(() => styleGen(theme), [theme]);
     const [followed, setFollowed] = useState<string[]>([]);
     const [followedClubs, setFollowedClubs] = useState<Club[]>([]);
     const [searchResults, setSearchResults] = useState<Club[]>([]);
@@ -98,7 +100,7 @@ export default function FollowingPage() {
   );
 }
 
-const style = StyleSheet.create({
+const styleGen = (theme: Theme) => StyleSheet.create({
     decor: {
         position: 'absolute',
         top: spacing.gap,

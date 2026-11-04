@@ -4,14 +4,14 @@ import { ImperativeRouter, useLocalSearchParams, useRouter } from 'expo-router';
 import { ClubEvent, estimateSurveyMinutes, formatLongDate, formatTimeRange, getEventFromId, isSurveyAvailable } from "@/utils/events";
 import { DotGrid, HardShadow } from "@/components/decor";
 import { ButtonHeader } from "@/components/ButtonHeader";
-import { theme } from "@/app/preferences";
-import { fonts, spacing } from "@/constants/theme";
+import { useTheme } from "@/contexts/theme";
+import { fonts, spacing, Theme } from "@/constants/theme";
 import * as Linking from 'expo-linking';
 import { ScrollableSection } from "@/components/ScrollableSection";
 import { ThemedDisplayTitle } from "@/components/ThemedInputs";
 import { ArrowButton } from "@/components/ThemedButton";
 import { ThemedBox } from "@/components/ThemedBox";
-import { useState } from "react";
+import { useState, useMemo } from "react";
 import { ClubRow } from "@/components/clubRow";
 import { handleSingleToggleFollow } from "@/utils/utils";
 
@@ -33,6 +33,8 @@ function handleGoToSurvey(event: ClubEvent, router: ImperativeRouter) {
 }
 
 export default function EventDetailsPage() {
+    const { theme } = useTheme();
+    const style = useMemo(() => styleGen(theme), [theme]);
     const { id } = useLocalSearchParams<{ id: string; }>();
     const event = getEventFromId(id);
     const router = useRouter();
@@ -62,7 +64,7 @@ export default function EventDetailsPage() {
                     style={({ pressed }) => [
                                 style.linkWrapper,
                                 {
-                                backgroundColor: pressed ? '#e1e1e1' : undefined, // Darker blue when pressed
+                                backgroundColor: pressed ? theme.disabled : undefined,
                                 },
                             ]}>
                         <Text style={style.shareLink}>SHARE</Text>
@@ -139,6 +141,8 @@ function EventSummary({
     location,
     subtitle
 }: EventSummaryProps) {
+    const { theme } = useTheme();
+    const style = useMemo(() => styleGen(theme), [theme]);
     return (
         <HardShadow color={theme.ink} style={{ marginTop: spacing.gap }}>
             <View style={style.summaryContainer}>
@@ -169,7 +173,7 @@ function EventSummary({
     );
 }
 
-const style = StyleSheet.create({
+const styleGen = (theme: Theme) => StyleSheet.create({
     sectionLabel: {
         fontFamily: fonts.label,
         fontSize: 14,

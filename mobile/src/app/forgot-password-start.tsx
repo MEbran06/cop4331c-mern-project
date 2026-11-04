@@ -5,7 +5,7 @@ import { ScrollableSection } from "@/components/ScrollableSection";
 import { ThemedBox } from "@/components/ThemedBox";
 import { ImperativeRouter, useRouter } from "expo-router";
 import { StyleSheet, Text, View } from "react-native";
-import { theme } from "./preferences";
+import { useTheme } from "@/contexts/theme";
 import { fonts, spacing } from "@/constants/theme";
 import { ThemedDisplayTitle, ThemedInputContainer, ThemedText, ThemedTextInput } from "@/components/ThemedInputs";
 import { useState } from "react";
@@ -29,6 +29,7 @@ async function handleSubmit(data: {email: string}, setErrors: CallableFunction, 
 }
 
 export default function ForgotPassword() {
+    const { theme } = useTheme();
     const router = useRouter();
     const [email, setEmail] = useState('');
     const [errors, setErrors] = useState<{email?: string[], password?: string[]}>();

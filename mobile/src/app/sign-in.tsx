@@ -1,12 +1,12 @@
 import { StyleSheet, View, Text } from 'react-native';
-import {useState} from 'react'
+import {useState, useMemo } from 'react'
 import {ArrowButton, EyeButton} from '@/components/ThemedButton'
 import { DotGrid, CornerSquares,  StripeBand } from '@/components/decor';
-import { fonts } from '@/constants/theme';
+import { fonts, Theme } from '@/constants/theme';
 import { useSession } from '@/contexts/ctx';
 import { useRouter } from 'expo-router';
 import * as z from 'zod';
-import { theme } from './preferences';
+import { useTheme } from '@/contexts/theme';
 // simulate for now since backend hasn't implemented it
 import { ScrollableSection } from '@/components/ScrollableSection';
 import { ThemedDisplayTitle, ThemedInputContainer, ThemedText, ThemedTextInput } from '@/components/ThemedInputs';
@@ -50,6 +50,8 @@ async function handleSubmit(
 }
 
 export default function SignIn() {
+  const { theme } = useTheme();
+  const styles = useMemo(() => stylesGen(theme), [theme]);
   const { signIn } = useSession();
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
@@ -81,7 +83,7 @@ export default function SignIn() {
                     secureTextEntry={isPasswordHidden} 
                     placeholder='Password' value={password} 
                     onChangeText={setPassword}
-                    right={<EyeButton toggle={isPasswordHidden} onPress={() => setPasswordHidden(!isPasswordHidden)}/>}/>
+                    right={<EyeButton theme={theme} toggle={isPasswordHidden} onPress={() => setPasswordHidden(!isPasswordHidden)}/>}/>
             </ThemedInputContainer>
             {!!loginError && <Text style={styles.fieldError}>*{loginError}</Text>}
             <View style={{marginTop: 20,}}>
@@ -107,7 +109,7 @@ export default function SignIn() {
   );
 }
 
-const styles = StyleSheet.create({
+const stylesGen = (theme: Theme) => StyleSheet.create({
     DisplayText: {
         fontFamily: fonts.display, 
         fontSize: 60, 

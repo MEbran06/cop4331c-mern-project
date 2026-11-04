@@ -1,16 +1,16 @@
 import { ThemedBox } from '@/components/ThemedBox';
 import { StyleSheet, Text, View } from 'react-native';
-import { theme } from './preferences';
+import { useTheme } from '@/contexts/theme';
 import { DotGrid, StripeBand } from '@/components/decor';
 import { ButtonHeader } from '@/components/ButtonHeader';
 import { useLocalSearchParams, useRouter } from 'expo-router';
-import { fonts, spacing } from '@/constants/theme';
+import { fonts, spacing, Theme } from '@/constants/theme';
 import { PageContainer } from '@/components/PageContainer';
 import { ThemedDisplayTitle } from '@/components/ThemedInputs';
 import { VerificationBox } from '@/components/CodeBox';
 import { ScrollableSection } from '@/components/ScrollableSection';
 import { ArrowButton } from '@/components/ThemedButton';
-import { useState } from 'react';
+import { useState, useMemo } from 'react';
 
 function handleVerification(code: string) {
     // todo: handle the submitted verification
@@ -23,6 +23,8 @@ function handleResendCode() {
 }
 
 export default function Verify() {
+    const { theme } = useTheme();
+    const styles = useMemo(() => stylesGen(theme), [theme]);
     const router = useRouter();
     const { email } = useLocalSearchParams<{ email: string }>();
     const [code, setCode] = useState('');
@@ -59,7 +61,7 @@ export default function Verify() {
     );
 }
 
-const styles = StyleSheet.create({
+const stylesGen = (theme: Theme) => StyleSheet.create({
     headerWrapper: {
         flexDirection: "row",
         justifyContent: "space-between",

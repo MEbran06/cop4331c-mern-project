@@ -3,12 +3,12 @@ import { StyleSheet, Text, View } from "react-native";
 import { useLocalSearchParams, useRouter } from 'expo-router';
 import { estimateSurveyMinutes, formatLongDate, getEventFromId, isSurveyAvailable } from "@/utils/events";
 import { ButtonHeader } from "@/components/ButtonHeader";
-import { theme } from "@/app/preferences";
-import { fonts, spacing } from "@/constants/theme";
+import { useTheme } from "@/contexts/theme";
+import { fonts, spacing, Theme } from "@/constants/theme";
 import { ScrollableSection } from "@/components/ScrollableSection";
 import { ThemedDisplayTitle } from "@/components/ThemedInputs";
 import { ArrowButton } from "@/components/ThemedButton";
-import { useState } from "react";
+import { useState, useMemo } from "react";
 import { isQuestionAnswered, QuestionCard, SurveyAnswer } from "@/components/QuestionCard";
 import { ThemedBox } from "@/components/ThemedBox";
 import { StripeBand } from "@/components/decor";
@@ -21,6 +21,8 @@ async function handleSubmitSurvey(surveyId: string, answers: Record<string, Surv
 
 
 export default function Survey() {
+    const { theme } = useTheme();
+    const style = useMemo(() => styleGen(theme), [theme]);
     
     const { eventId } = useLocalSearchParams<{ eventId: string; }>();
     const event = getEventFromId(eventId);
@@ -141,7 +143,7 @@ export default function Survey() {
 }
 
 
-const style = StyleSheet.create({
+const styleGen = (theme: Theme) => StyleSheet.create({
     // back arrow with "SURVEY · FILM SOCIETY" right next to it
     header: {
         justifyContent: 'flex-start',

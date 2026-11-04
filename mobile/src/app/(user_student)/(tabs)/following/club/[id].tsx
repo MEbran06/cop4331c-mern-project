@@ -1,4 +1,4 @@
-import { theme } from '@/app/preferences';
+import { useTheme } from '@/contexts/theme';
 import { getInitials } from '@/components/clubRow';
 import { PageContainer } from '@/components/PageContainer';
 import { ScrollableSection } from '@/components/ScrollableSection';
@@ -6,12 +6,12 @@ import { ThemedBox } from '@/components/ThemedBox';
 import { Club, ClubEvent, getEventStatus } from '@/utils/events';
 import { getClubEvents, searchClubById } from '@/utils/mockEvents';
 import { useFocusEffect, useLocalSearchParams, useRouter } from 'expo-router';
-import { useCallback, useState } from 'react';
+import { useCallback, useState, useMemo } from 'react';
 import { ActivityIndicator, StyleSheet, Text, View } from 'react-native';
 import { ButtonHeader } from '@/components/ButtonHeader';
 import { ThemedDisplayTitle } from '@/components/ThemedInputs';
 import { ArrowButton, FollowButton } from '@/components/ThemedButton';
-import { fonts, spacing } from '@/constants/theme';
+import { fonts, spacing, Theme } from '@/constants/theme';
 import { CornerSquares, DotGrid } from '@/components/decor';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { handleSingleToggleFollow } from '@/utils/utils';
@@ -34,6 +34,8 @@ function eventsFor(status: string, sort: 'asc' | 'desc', events: ClubEvent[]): C
 }
 
 export default function FollowingPage() {
+    const { theme } = useTheme();
+    const style = useMemo(() => styleGen(theme), [theme]);
     const { id } = useLocalSearchParams<{ id: string; }>();
     const router = useRouter();
     const [club, SetClub] = useState<Club>();
@@ -105,12 +107,12 @@ export default function FollowingPage() {
                         flexDirection:"row", justifyContent:"space-between"
                     }}>
                         <ButtonHeader onAction={goBack} theme={theme} buttonType="arrow-left"/>
-                        <DotGrid/>
+                        <DotGrid color={theme.onHi}/>
                     </View>
                     <View style={{
                         alignItems: 'flex-end'
                     }}>
-                        <CornerSquares/>
+                        <CornerSquares accent={theme.s3} ink={theme.ink}/>
                     </View>
                 </View>
 
@@ -148,7 +150,7 @@ export default function FollowingPage() {
         </PageContainer>
     );
 }
-const style = StyleSheet.create({
+const styleGen = (theme: Theme) => StyleSheet.create({
     loading: {
         flex: 1
     },

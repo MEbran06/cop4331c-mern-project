@@ -3,17 +3,19 @@ import { StyleSheet, Text, View } from 'react-native';
 import { useSession } from '@/contexts/ctx';
 import { PageContainer } from '@/components/PageContainer';
 import { useFocusEffect, useRouter } from 'expo-router';
-import { useCallback, useState } from 'react';
+import { useCallback, useState, useMemo } from 'react';
 import { fetchProfile, StudentProfile } from '@/utils/profiles';
 import { ThemedDisplayTitle } from '@/components/ThemedInputs';
-import { theme } from '@/app/preferences';
+import { useTheme } from '@/contexts/theme';
 import { DotGrid, HardShadow } from '@/components/decor';
-import { fonts, spacing } from '@/constants/theme';
+import { fonts, spacing, Theme } from '@/constants/theme';
 import { ArrowButton } from '@/components/ThemedButton';
 import { ProfileCard } from '@/components/ProfileCard';
 import { SettingsRow } from '@/components/SettingsRow';
 
 export default function FollowingPage() {
+    const { theme } = useTheme();
+    const style = useMemo(() => styleGen(theme), [theme]);
     const {session, user, signOut} = useSession();
     const [profile, SetProfile] = useState<StudentProfile>();
     const router = useRouter();
@@ -50,7 +52,7 @@ export default function FollowingPage() {
         <PageContainer>
             <View style={{flexDirection:"row", justifyContent:"space-between", alignItems:"center"}}>
                 <ThemedDisplayTitle fontSize={48} highlightedFirst text='' theme={theme} highlight='Profile' inline/>
-                <DotGrid/>
+                <DotGrid color={theme.ink}/>
             </View>
             <ProfileCard theme={theme}
                 name={profile.name}
@@ -83,7 +85,7 @@ export default function FollowingPage() {
     );
 }
 
-const style = StyleSheet.create({
+const styleGen = (theme: Theme) => StyleSheet.create({
      notFoundText: {
         fontFamily: fonts.body,
         fontSize: 15,

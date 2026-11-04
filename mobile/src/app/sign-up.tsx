@@ -1,11 +1,11 @@
 import { Pressable, StyleSheet, Text, View } from 'react-native';
 import { fonts, Theme, spacing } from '@/constants/theme';
-import { theme } from './preferences';
+import { useTheme } from '@/contexts/theme';
 import { ArrowButton, EyeButton } from '@/components/ThemedButton';
 import { ImperativeRouter, useRouter } from 'expo-router';
 import { ButtonHeader } from '@/components/ButtonHeader';
 import { HardShadow } from '@/components/decor';
-import { useState } from 'react';
+import { useState, useMemo } from 'react';
 import {Ionicons} from '@react-native-vector-icons/ionicons';
 import * as z from 'zod';
 import { ScrollableSection } from '@/components/ScrollableSection';
@@ -35,6 +35,8 @@ async function handleSubmit(data: {role: string, fullName: string, email: string
 }
 
 export default function SignUp() {
+    const { theme } = useTheme();
+    const styles = useMemo(() => stylesGen(theme), [theme]);
     const router = useRouter();
     const [email, setEmail] = useState('');
     const [password, setPassword] = useState('');
@@ -90,7 +92,7 @@ export default function SignUp() {
                     secureTextEntry={isPasswordHidden} 
                     placeholder='Password' value={password} 
                     onChangeText={setPassword}
-                    right={<EyeButton toggle={isPasswordHidden} onPress={() => setPasswordHidden(!isPasswordHidden)}/>}/>
+                    right={<EyeButton theme={theme} toggle={isPasswordHidden} onPress={() => setPasswordHidden(!isPasswordHidden)}/>}/>
             </ThemedInputContainer>
         </View>
         </ScrollableSection>  
@@ -157,7 +159,7 @@ function RoleCard({onPress, selected, title, theme, description, icon}: RoleCard
     );
 }
 
-const styles = StyleSheet.create({
+const stylesGen = (theme: Theme) => StyleSheet.create({
     DisplayText: {
         fontFamily: fonts.display, 
         fontSize: 48, 

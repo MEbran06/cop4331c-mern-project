@@ -1,7 +1,6 @@
-import { isIOS } from "@/app/preferences";
 import { ReactNode } from "react";
 import { KeyboardAvoidingView, ScrollView } from "react-native";
-
+import { isIOS } from "@/constants/theme";
 
 interface Props {
     children?: ReactNode

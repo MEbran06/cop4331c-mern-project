@@ -9,6 +9,7 @@ import {
   Archivo_400Regular, Archivo_600SemiBold, Archivo_700Bold, Archivo_800ExtraBold,
 } from '@expo-google-fonts/archivo';
 import { ArchivoNarrow_700Bold } from '@expo-google-fonts/archivo-narrow';
+import { ThemeProvider } from '@/contexts/theme';
 
 export const unstable_settings = {
   anchor: 'sign-in',
@@ -26,8 +27,10 @@ export default function Root() {
   // Set up the auth context and render your layout inside of it.
   return (
     <SessionProvider>
-      <SplashScreenController />
-      <RootLayout />
+        <ThemeProvider>
+            <SplashScreenController />
+            <RootLayout />
+      </ThemeProvider>
     </SessionProvider>
   );
 }

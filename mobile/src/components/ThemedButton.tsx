@@ -5,7 +5,6 @@ import { ArrowLeftIcon, ArrowRightIcon, EyeIcon, EyeOffIcon } from './icons';
 import { HardShadow } from './decor';
 import { Theme, fonts, spacing } from '../constants/theme';
 import Feather from '@react-native-vector-icons/feather';
-import { theme } from '@/app/preferences';
 
 // 'primary' = orange (Log in, Publish), 'plain' = white (bell, back, secondary actions)
 export type ButtonVariant = 'primary' | 'plain';
@@ -188,19 +187,20 @@ export function FilterChip({ label, selected, onPress, theme }: FilterChipProps)
 }
 
 
-export function EyeButton({onPress, toggle}:
-    {onPress: ()=>void, toggle: boolean}) {
+export function EyeButton({onPress, toggle, theme}:
+    {onPress: ()=>void, toggle: boolean, theme: Theme}) {
     return (
     <Pressable accessibilityLabel={toggle? 'Show Password': 'Hide Password'}
         accessibilityRole='button'
         style={{
         width: 52,
-        borderLeftWidth: 4,
+        borderLeftWidth: theme.borderWidth,
+        borderLeftColor: theme.ink,
         justifyContent: "center",
         alignItems: "center"
-        }} 
+        }}
         onPress={onPress}>
-        {toggle ? <EyeIcon/> : <EyeOffIcon/>}
+        {toggle ? <EyeIcon color={theme.ink}/> : <EyeOffIcon color={theme.ink}/>}
     </Pressable>);
 }
 
@@ -229,7 +229,7 @@ export function FollowButton({isFollowing, onPress, ...rest}: FollowButtonProps)
                 borderColor: rest.theme.ink,
                 }}
             >
-                <Feather name='plus' size={20} color={theme.card}/>
+                <Feather name='plus' size={20} color={rest.theme.card}/>
             </View>
             <View style={{ flex: 1, alignItems: 'center', justifyContent: 'center', paddingHorizontal: 12 }}>
                 <Text style={{
@@ -246,11 +246,11 @@ export function FollowButton({isFollowing, onPress, ...rest}: FollowButtonProps)
         <Text style={{
             fontFamily: fonts.body,
             fontSize: 14,
-            color: theme.muted,
+            color: rest.theme.muted,
             marginTop: 7
         }}>
-            {isFollowing? "Follow to see their events in your feed and get their surveys." :
-                        "Their events now show up in your feed. Tap again to unfollow."}
+            {isFollowing? "Their events now show up in your feed. Tap again to unfollow." :
+                        "Follow to see their events in your feed and get their surveys."}
         </Text>
         </View>
     );
