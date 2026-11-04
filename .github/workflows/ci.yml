@@ -29,6 +29,7 @@ jobs:
               - 'backend/**'
               - 'shared/**'
               - 'package-lock.json'
+              - '.github/workflows/ci.yml'   # a pipeline change redeploys, to test it
             mobile:
               - 'mobile/**'
               - 'shared/**'
@@ -82,8 +83,12 @@ jobs:
         with:
           node-version: 22
           cache: npm
+      # frontend/ is still empty, and npm fails on a workspace with no
+      # package.json, so these only run once it exists
       - run: npm ci --workspace frontend
+        if: hashFiles('frontend/package.json') != ''
       - run: npm test --workspace frontend --if-present
+        if: hashFiles('frontend/package.json') != ''
 
   # Only real pushes to master deploy. PRs just run the tests.
   deploy:
