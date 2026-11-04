@@ -1,0 +1,172 @@
+name: CI/CD
+
+on:
+  push:
+    branches: [master]
+  pull_request:
+    branches: [master]
+
+# a newer push to the same branch cancels the run still in progress
+concurrency:
+  group: ci-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  # Works out which folders this push / PR touched
+  changes:
+    runs-on: ubuntu-latest
+    outputs:
+      backend: ${{ steps.filter.outputs.backend }}
+      mobile: ${{ steps.filter.outputs.mobile }}
+      frontend: ${{ steps.filter.outputs.frontend }}
+    steps:
+      - uses: actions/checkout@v4
+      - uses: dorny/paths-filter@v3
+        id: filter
+        with:
+          filters: |
+            backend:
+              - 'backend/**'
+              - 'shared/**'
+              - 'package-lock.json'
+            mobile:
+              - 'mobile/**'
+              - 'shared/**'
+              - 'package-lock.json'
+            frontend:
+              - 'frontend/**'
+              - 'shared/**'
+              - 'package-lock.json'
+
+  test-backend:
+    needs: changes
+    if: needs.changes.outputs.backend == 'true'
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 26
+          cache: npm
+      # the lockfile lives at the root (workspaces), so install from there,
+      # but only the backend's dependencies
+      - run: npm ci --workspace backend
+      - run: npm test --workspace backend --if-present
+
+  test-mobile:
+    needs: changes
+    if: needs.changes.outputs.mobile == 'true'
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+      - run: npm ci --workspace mobile
+      - name: Lint
+        run: npm run lint
+        working-directory: mobile
+      - name: Typecheck
+        run: npx tsc --noEmit
+        working-directory: mobile
+      - run: npm test --workspace mobile --if-present
+
+  test-frontend:
+    needs: changes
+    if: needs.changes.outputs.frontend == 'true'
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+      - run: npm ci --workspace frontend
+      - run: npm test --workspace frontend --if-present
+
+  # Only real pushes to master deploy. PRs just run the tests.
+  deploy:
+    needs: [changes, test-backend, test-frontend]
+    # !failure() lets this run when a test job was skipped (its folder didn't
+    # change), but not when one failed
+    if: >
+      !failure() && !cancelled() &&
+      github.event_name == 'push' &&
+      github.ref == 'refs/heads/master' &&
+      (needs.changes.outputs.backend == 'true' || needs.changes.outputs.frontend == 'true')
+    runs-on: ubuntu-latest
+    # Secrets can't be read in an `if`, so they're copied into env first.
+    # Until SSH_HOST is set, the deploy steps below are skipped instead of failing.
+    env:
+      SSH_HOST: ${{ secrets.SSH_HOST }}
+      SSH_USER: ${{ secrets.SSH_USER }}
+      APP_DIR: ${{ secrets.APP_DIR }}             # e.g. /home/deploy/mern-app
+      FRONTEND_DIR: ${{ secrets.FRONTEND_DIR }}   # folder Apache serves for the site
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 26
+          cache: npm
+
+      # The web app is served as built files, so it's built here and only
+      # dist/ goes to the droplet. Skipped until frontend/ has a package.json.
+      - name: Build the frontend
+        if: hashFiles('frontend/package.json') != ''
+        run: |
+          npm ci --workspace frontend
+          npm run build --workspace frontend
+
+      - name: Set up SSH
+        if: env.SSH_HOST != ''
+        env:
+          SSH_PRIVATE_KEY: ${{ secrets.SSH_PRIVATE_KEY }}
+        run: |
+          mkdir -p ~/.ssh
+          echo "$SSH_PRIVATE_KEY" > ~/.ssh/deploy_key
+          chmod 600 ~/.ssh/deploy_key
+          ssh-keyscan -H "$SSH_HOST" >> ~/.ssh/known_hosts
+
+      # Copies the root package.json + lockfile and backend/, keeping the same
+      # layout as the repo so `npm ci --workspace backend` works on the droplet.
+      # rsync uses the first rule that matches: the excludes come first so
+      # node_modules and .env are skipped inside backend/ too, and excluded
+      # files are never deleted on the droplet. --exclude '*' drops the rest.
+      - name: Copy the API code to the droplet
+        if: env.SSH_HOST != ''
+        run: >
+          rsync -az --delete --no-owner --no-group
+          --exclude 'node_modules/' --exclude '.env'
+          --exclude 'api-tests/' --exclude 'Dockerfile' --exclude 'docker-compose.yml'
+          --include '/package.json' --include '/package-lock.json'
+          --include '/backend/***'
+          --exclude '*'
+          -e "ssh -i ~/.ssh/deploy_key"
+          ./ "$SSH_USER@$SSH_HOST:$APP_DIR/"
+
+      - name: Copy the built frontend to the droplet
+        if: env.SSH_HOST != '' && hashFiles('frontend/package.json') != ''
+        run: >
+          rsync -az --delete --no-owner --no-group
+          -e "ssh -i ~/.ssh/deploy_key"
+          ./frontend/dist/ "$SSH_USER@$SSH_HOST:$FRONTEND_DIR/"
+
+      # Installs the backend's production dependencies (no nodemon), restarts
+      # the service, and fails the deploy if the API doesn't answer.
+      # SSH commands don't load nvm, so nvm-exec runs npm with Node 26, the
+      # same version the service uses. mern-api is a user service owned by
+      # the deploy user, so restarting it needs no sudo; XDG_RUNTIME_DIR tells
+      # systemctl --user where to find it. (\$ is expanded on the droplet,
+      # not on GitHub.)
+      - name: Install and restart on the droplet
+        if: env.SSH_HOST != ''
+        run: |
+          ssh -i ~/.ssh/deploy_key "$SSH_USER@$SSH_HOST" "
+            set -e
+            export XDG_RUNTIME_DIR=/run/user/\$(id -u)
+            cd $APP_DIR
+            NODE_VERSION=26 ~/.nvm/nvm-exec npm ci --workspace backend --omit=dev
+            systemctl --user restart events-api
+            curl -fsS --retry 10 --retry-delay 2 --retry-connrefused http://localhost:5000/api/ping
+          "

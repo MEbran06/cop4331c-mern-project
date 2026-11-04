@@ -1,5 +1,4 @@
-# Use Node.js 22 Alpine Linux image as base
-FROM docker.io/node:22-alpine
+FROM docker.io/node:26-alpine
 
 # Set working directory
 WORKDIR /usr/src/app
