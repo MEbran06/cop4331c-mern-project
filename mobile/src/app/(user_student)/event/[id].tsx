@@ -1,7 +1,7 @@
 import { PageContainer } from "@/components/PageContainer";
-import { StyleSheet, Text, View, Share, Button, Pressable } from "react-native";
+import { StyleSheet, Text, View, Share, Pressable } from "react-native";
 import { ImperativeRouter, useLocalSearchParams, useRouter } from 'expo-router';
-import { Club, ClubEvent, estimateSurveyMinutes, formatLongDate, formatTimeRange, getEventFromId, isSurveyAvailable } from "@/utils/events";
+import { ClubEvent, estimateSurveyMinutes, formatLongDate, formatTimeRange, getEventFromId, isSurveyAvailable } from "@/utils/events";
 import { DotGrid, HardShadow } from "@/components/decor";
 import { ButtonHeader } from "@/components/ButtonHeader";
 import { theme } from "@/app/preferences";
@@ -9,12 +9,10 @@ import { fonts, spacing } from "@/constants/theme";
 import * as Linking from 'expo-linking';
 import { ScrollableSection } from "@/components/ScrollableSection";
 import { ThemedDisplayTitle } from "@/components/ThemedInputs";
-import { ArrowButton, ThemedButton } from "@/components/ThemedButton";
+import { ArrowButton } from "@/components/ThemedButton";
 import { ThemedBox } from "@/components/ThemedBox";
-import { Feather } from "@react-native-vector-icons/feather";
 import { useState } from "react";
 import { ClubRow } from "@/components/clubRow";
-import { setClubFollowing } from "@/utils/mockEvents";
 import { handleSingleToggleFollow } from "@/utils/utils";
 
 async function handleShared(event: ClubEvent | undefined) {

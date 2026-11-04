@@ -1,6 +1,5 @@
-import { Pressable, StyleSheet, Text, View } from 'react-native';
+import { StyleSheet, Text, View } from 'react-native';
 
-import { useSession } from '@/contexts/ctx';
 import { PageContainer } from '@/components/PageContainer';
 import { ButtonHeader } from '@/components/ButtonHeader';
 import { useRouter } from 'expo-router';
@@ -8,8 +7,8 @@ import { theme } from '@/app/preferences';
 import { CheckerStrip, DotGrid } from '@/components/decor';
 import { ScrollableSection } from '@/components/ScrollableSection';
 import { ThemedDisplayTitle } from '@/components/ThemedInputs';
-import { fonts, spacing, Theme } from '@/constants/theme';
-import { useMemo, useState } from 'react';
+import { fonts, spacing } from '@/constants/theme';
+import { useState } from 'react';
 import { FilterChip } from '@/components/ThemedButton';
 
 // for testing
@@ -49,7 +48,7 @@ function eventsFor(status: EventStatus, sort: 'asc' | 'desc'): ClubEvent[] {
 export default function Dashboard() {
   const router = useRouter();
   const [filter, setFilter] = useState<Filter>('all');
-  const style = useMemo(() => stylesGen(theme), [theme]);
+
   return (
     <PageContainer>
         <ButtonHeader onAction={() => null}
@@ -92,7 +91,7 @@ export default function Dashboard() {
   );
 }
 
-const stylesGen = (theme: Theme) => StyleSheet.create({
+const style = StyleSheet.create({
     clubTag: {
         backgroundColor: theme.hi,
         borderWidth: 3,

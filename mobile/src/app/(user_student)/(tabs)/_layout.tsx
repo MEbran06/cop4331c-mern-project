@@ -1,9 +1,8 @@
 import { TabContainer } from '@/components/app-tabs';
-import { Stack, Tabs } from 'expo-router';
+import { Tabs } from 'expo-router';
 import { theme } from '../../preferences';
 import {Lucide} from '@react-native-vector-icons/lucide';
 import {Ionicons} from '@react-native-vector-icons/ionicons';
-import { NativeTabs } from 'expo-router/build/native-tabs/NativeTabs.js';
 
 export default function StudentLayout() {
   // This renders the navigation stack for all authenticated app routes.

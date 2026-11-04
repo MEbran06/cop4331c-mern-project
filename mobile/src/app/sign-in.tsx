@@ -1,15 +1,13 @@
 import { StyleSheet, View, Text } from 'react-native';
 import {useState} from 'react'
 import {ArrowButton, EyeButton} from '@/components/ThemedButton'
-import { DotGrid, CornerSquares, Highlight } from '@/components/decor';
-import { fonts, spacing } from '@/constants/theme';
-import { StripeBand } from '@/components/decor';
+import { DotGrid, CornerSquares,  StripeBand } from '@/components/decor';
+import { fonts } from '@/constants/theme';
 import { useSession } from '@/contexts/ctx';
 import { useRouter } from 'expo-router';
 import * as z from 'zod';
 import { theme } from './preferences';
 // simulate for now since backend hasn't implemented it
-import {simulateGenerateToken, UserPayload} from '@/utils/mockJwt'
 import { ScrollableSection } from '@/components/ScrollableSection';
 import { ThemedDisplayTitle, ThemedInputContainer, ThemedText, ThemedTextInput } from '@/components/ThemedInputs';
 import { PageContainer } from '@/components/PageContainer';
@@ -87,7 +85,7 @@ export default function SignIn() {
             </ThemedInputContainer>
             {!!loginError && <Text style={styles.fieldError}>*{loginError}</Text>}
             <View style={{marginTop: 20,}}>
-            <ArrowButton label='Log In' theme={theme}
+            <ArrowButton label='Log In' theme={theme} loading={submitting}
                 onPress={async () => {
                     setSubmitting(true);
                     try {

@@ -1,11 +1,7 @@
 import { StyleSheet, View, Text, TextInput } from "react-native";
 import { HardShadow } from "./decor";
-import { useMemo, useRef, useState } from "react";
-import {Feather} from "@react-native-vector-icons/feather"
-import { ComponentProps } from "react";
+import { useMemo } from "react";
 import { fonts, spacing, Theme } from "@/constants/theme";
-
-type FeatherProps = ComponentProps<typeof Feather>;
 
 interface CodeBoxProps {
     size: number,

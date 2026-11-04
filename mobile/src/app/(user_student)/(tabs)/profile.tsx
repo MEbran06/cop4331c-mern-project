@@ -1,14 +1,13 @@
-import { Pressable, StyleSheet, Text, View } from 'react-native';
+import { StyleSheet, Text, View } from 'react-native';
 
 import { useSession } from '@/contexts/ctx';
 import { PageContainer } from '@/components/PageContainer';
 import { useFocusEffect, useRouter } from 'expo-router';
-import { act, useCallback, useState } from 'react';
+import { useCallback, useState } from 'react';
 import { fetchProfile, StudentProfile } from '@/utils/profiles';
 import { ThemedDisplayTitle } from '@/components/ThemedInputs';
 import { theme } from '@/app/preferences';
 import { DotGrid, HardShadow } from '@/components/decor';
-import { ThemedBox } from '@/components/ThemedBox';
 import { fonts, spacing } from '@/constants/theme';
 import { ArrowButton } from '@/components/ThemedButton';
 import { ProfileCard } from '@/components/ProfileCard';
@@ -34,7 +33,7 @@ export default function FollowingPage() {
 
         return ()=>{active=false;};
 
-    }, []));
+    }, [user, session]));
 
     if (!profile) {
         return (

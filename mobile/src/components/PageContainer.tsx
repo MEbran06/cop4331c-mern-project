@@ -1,4 +1,3 @@
-import { fonts } from "@/constants/theme";
 import { ReactNode, useMemo } from "react";
 import { StyleSheet, View } from "react-native";
 import { EdgeInsets, useSafeAreaInsets } from "react-native-safe-area-context";

@@ -1,6 +1,5 @@
 import { View, Text, StyleSheet, StyleProp, ViewStyle } from "react-native"
 import { useMemo } from "react";
-import { Feather } from "@react-native-vector-icons/feather";
 import { fonts, Theme } from "@/constants/theme";
 import { ThemedBox } from "./ThemedBox";
 import { HardShadow } from "./decor";

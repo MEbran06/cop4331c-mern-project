@@ -4,7 +4,7 @@ import { theme } from './preferences';
 import { ArrowButton, EyeButton } from '@/components/ThemedButton';
 import { ImperativeRouter, useRouter } from 'expo-router';
 import { ButtonHeader } from '@/components/ButtonHeader';
-import { HardShadow, Highlight } from '@/components/decor';
+import { HardShadow } from '@/components/decor';
 import { useState } from 'react';
 import {Ionicons} from '@react-native-vector-icons/ionicons';
 import * as z from 'zod';

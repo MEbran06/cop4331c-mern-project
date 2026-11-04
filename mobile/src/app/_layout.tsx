@@ -34,7 +34,7 @@ export default function Root() {
 
 // Create a new component that can access the SessionProvider context later.
 export function RootLayout() {
-  const { session, user } = useSession();
+  const { user } = useSession();
 
   return (
     <Stack screenOptions={{ headerShown: false }}>

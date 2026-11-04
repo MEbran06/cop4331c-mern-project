@@ -1,5 +1,4 @@
 import { FontAwesomeFreeSolid } from "@react-native-vector-icons/fontawesome-free-solid";
-import { Pressable, PressableProps, StyleProp, ViewStyle } from "react-native";
 
 type IconProps = {
   size?: number;

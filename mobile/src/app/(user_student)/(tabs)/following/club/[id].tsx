@@ -7,7 +7,7 @@ import { Club, ClubEvent, getEventStatus } from '@/utils/events';
 import { getClubEvents, searchClubById } from '@/utils/mockEvents';
 import { useFocusEffect, useLocalSearchParams, useRouter } from 'expo-router';
 import { useCallback, useState } from 'react';
-import { ActivityIndicator, Pressable, StyleSheet, Text, View } from 'react-native';
+import { ActivityIndicator, StyleSheet, Text, View } from 'react-native';
 import { ButtonHeader } from '@/components/ButtonHeader';
 import { ThemedDisplayTitle } from '@/components/ThemedInputs';
 import { ArrowButton, FollowButton } from '@/components/ThemedButton';

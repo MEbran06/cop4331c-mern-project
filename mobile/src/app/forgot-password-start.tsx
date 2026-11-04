@@ -3,7 +3,7 @@ import { DotGrid, StripeBand } from "@/components/decor";
 import { PageContainer } from "@/components/PageContainer";
 import { ScrollableSection } from "@/components/ScrollableSection";
 import { ThemedBox } from "@/components/ThemedBox";
-import { ImperativeRouter, router, useRouter } from "expo-router";
+import { ImperativeRouter, useRouter } from "expo-router";
 import { StyleSheet, Text, View } from "react-native";
 import { theme } from "./preferences";
 import { fonts, spacing } from "@/constants/theme";

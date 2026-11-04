@@ -1,4 +1,4 @@
-import { use, useMemo, createContext, type PropsWithChildren } from 'react';
+import { use, useMemo, createContext, type PropsWithChildren, useCallback, useEffect } from 'react';
 import { jwtDecode } from 'jwt-decode';
 import { useStorageState, setStorageItemAsync } from '../hooks/useStorageState'
 
@@ -28,22 +28,46 @@ export function useSession() {
 }
 
 export function SessionProvider({ children }: PropsWithChildren) {
-  const [[isLoading, session], setSession] = useStorageState('session');
-  // Derive the profile from the stored token so it survives app restarts.
-  const user = useMemo<AuthUser | null>(() => {
-    if (!session) return null;
-    try {
-        const decoded = jwtDecode<AuthUser & { exp?: number }>(session);
+    const [[isLoading, session], setSession] = useStorageState('session');
+    // Derive the profile from the stored token so it survives app restarts.
+    const user = useMemo<AuthUser | null>(() => {
+        if (!session) return null;
+        try {
+            return jwtDecode<AuthUser & { exp?: number }>(session);
+        } catch {
+        return null;
+        }
+    }, [session]);
 
-        // sends user back to sign in if token expired
-        if (decoded.exp && decoded.exp * 1000 < Date.now()) 
-            return null;
-        
-        return decoded;
-    } catch {
-      return null;
-    }
-  }, [session]);
+    const signOut = useCallback(async () => {
+        try {
+            await setStorageItemAsync('jwt_refresh_token', null);
+            setSession(null);
+        } catch (e) {
+            console.error('Failed to clear session tokens', e);
+        }
+    }, [setSession]);
+
+    // signs the user out the moment the token expires, whether that's
+    // before the app opened or while it's open
+    useEffect(() => {
+        if (!session) return;
+        let exp: number | undefined;
+        try {
+            exp = jwtDecode<{ exp?: number }>(session).exp;
+        } catch {
+            return;
+        }
+        if (!exp) return;
+
+        const msLeft = exp * 1000 - Date.now();
+        if (msLeft <= 0) {
+            signOut();
+            return;
+        }
+        const timer = setTimeout(signOut, msLeft);
+        return () => clearTimeout(timer);   // new token or sign-out: cancel the old timer
+    }, [session, signOut]);
 
   return (
     <AuthContext.Provider
@@ -59,14 +83,7 @@ export function SessionProvider({ children }: PropsWithChildren) {
             console.error('Failed to save session tokens', e);
             }
         },
-        signOut: async () => {
-            try {
-            await setStorageItemAsync('jwt_refresh_token', null);
-            setSession(null);
-            } catch (e) {
-            console.error('Failed to clear session tokens', e);
-            }
-        },
+        signOut: signOut,
         session,
         user,
         isLoading,

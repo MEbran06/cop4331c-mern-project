@@ -1,9 +1,9 @@
 import { StyleSheet, View, Text } from "react-native";
 import { HardShadow } from "./decor";
-import { useMemo } from "react";
+import { useMemo , ComponentProps } from "react";
 import {Feather} from "@react-native-vector-icons/feather"
-import { ComponentProps } from "react";
-import { fonts, spacing, Theme } from "@/constants/theme";
+
+import { fonts, Theme } from "@/constants/theme";
 
 type FeatherProps = ComponentProps<typeof Feather>;
 
