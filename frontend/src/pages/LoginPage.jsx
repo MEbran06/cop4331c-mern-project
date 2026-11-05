@@ -2,7 +2,7 @@ import { useState } from 'react';
 import { useNavigate, Link } from 'react-router-dom';
 
 export default function LoginPage() {
-  const [username, setUsername] = useState('');
+  const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const navigate = useNavigate();
 
@@ -19,7 +19,7 @@ export default function LoginPage() {
         headers: {
           'Content-Type': 'application/json',
         },
-        body: JSON.stringify({ login: username, password: password }) 
+        body: JSON.stringify({ email, password })
       });
 
       const data = await response.json();
@@ -27,11 +27,11 @@ export default function LoginPage() {
       if (response.ok) {
         navigate('/dashboard');
       } else {
-        navigate('/error');
+        alert(`Login failed: ${data.error || 'Invalid credentials'}`);
       }
     } catch (error) {
       console.error('Login error:', error);
-      navigate('/error');
+      alert('Could not connect to the server.');
     }
   };
 
@@ -40,12 +40,22 @@ export default function LoginPage() {
       <h1>Login</h1>
       <form onSubmit={handleLogin}>
         <div>
-          <label>Username: </label>
-          <input type="text" onChange={(e) => setUsername(e.target.value)} required />
+          <label>Email: </label>
+          <input 
+            type="email" 
+            value={email} 
+            onChange={(e) => setEmail(e.target.value)} 
+            required 
+          />
         </div>
         <div>
           <label>Password: </label>
-          <input type="password" onChange={(e) => setPassword(e.target.value)} required />
+          <input 
+            type="password" 
+            value={password} 
+            onChange={(e) => setPassword(e.target.value)} 
+            required 
+          />
         </div>
         <button type="submit">Login</button>
       </form>
