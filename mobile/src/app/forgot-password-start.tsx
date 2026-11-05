@@ -11,6 +11,7 @@ import { ThemedDisplayTitle, ThemedInputContainer, ThemedText, ThemedTextInput }
 import { useState } from "react";
 import * as z from 'zod';
 import { ArrowButton } from "@/components/ThemedButton";
+import { useSession } from "@/contexts/ctx";
 
 const emailFormSchema = z.object({
     email: z.string().min(1, {message: 'Email is required'}).email({message: "Invalid email address"})
@@ -25,12 +26,18 @@ async function handleSubmit(data: {email: string}, setErrors: CallableFunction, 
     }
 
     // todo: call backend
-    router.push({ pathname: '/password-reset-code', params: { email: data.email } });
+    router.push({ 
+        pathname: '/password-reset-code', 
+        params: { 
+            email: data.email
+        } 
+    });
 }
 
 export default function ForgotPassword() {
     const { theme } = useTheme();
     const router = useRouter();
+    const {session} = useSession();
     const [email, setEmail] = useState('');
     const [errors, setErrors] = useState<{email?: string[], password?: string[]}>();
 
@@ -50,7 +57,7 @@ export default function ForgotPassword() {
             </Text>
             <ThemedInputContainer theme={theme} label='email' 
                 error={errors?.email?.at(0)} hint="Club accounts: use the club's email.">
-                <ThemedTextInput placeholder='you@university.edu' value={email} onChangeText={setEmail} theme={theme}/>
+                <ThemedTextInput autoCapitalize="none" keyboardType="email-address" autoComplete="email" placeholder='you@university.edu' value={email} onChangeText={setEmail} theme={theme}/>
             </ThemedInputContainer>
             <View style={{marginTop: 20,}}>
             <ArrowButton label='Send Code' theme={theme}
@@ -61,8 +68,8 @@ export default function ForgotPassword() {
             </View>
             </ScrollableSection>
             <ThemedText text='remembered it?' 
-                theme={theme} link='log in'
-                onLinkPress={()=>router.navigate('/sign-in')}/>
+                theme={theme} link={!!session ? 'go back' :'log in'}
+                onLinkPress={()=>!!session ? router.back() : router.navigate('/sign-in')}/>
             <StripeBand ink={theme.ink} background={theme.card} style={{ position: 'absolute', left: 0, right: 0, bottom: 0}} />
         </PageContainer>
     );

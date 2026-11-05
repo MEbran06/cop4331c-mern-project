@@ -14,7 +14,8 @@ import { useState, useMemo } from 'react';
 
 function handleResetCode(code: string, router: ImperativeRouter) {
     // todo: handle the submitted verification
-    router.navigate("/new-password");
+    const MOCK_RESET_TOKEN = 'mock_reset_token'
+    router.push({pathname:"/new-password", params:{resetToken: MOCK_RESET_TOKEN}});
 }
 
 function handleResendCode() {

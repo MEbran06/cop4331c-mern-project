@@ -1,21 +1,16 @@
 import { ButtonHeader } from "@/components/ButtonHeader";
 import { PageContainer } from "@/components/PageContainer";
-import { useRouter } from "expo-router";
-import { Text, View } from "react-native";
+import { useLocalSearchParams, useRouter } from "expo-router";
+import { Alert, Text, View } from "react-native";
 import { useTheme } from "@/contexts/theme";
 import { ScrollableSection } from "@/components/ScrollableSection";
 import { ThemedDisplayTitle, ThemedInputContainer, ThemedTextInput } from "@/components/ThemedInputs";
 import { fonts, spacing } from "@/constants/theme";
 import { useState } from "react";
 import { ArrowButton, EyeButton } from "@/components/ThemedButton";
-import { useSession } from "@/contexts/ctx";
 import * as z from 'zod';
-// simulate for now since backend hasn't implemented it
-import { simulateGenerateToken, UserPayload } from '@/utils/mockJwt'
 import { StripeBand } from "@/components/decor";
-
-// replace with the short-lived reset token from the backend once it exists
-const MOCK_RESET_TOKEN = 'mock-reset-token';
+import { AuthUser, useSession } from "@/contexts/ctx";
 
 const newPasswordSchema = z.object({
     password: z.string().min(8, 'Password must be at least 8 characters'),
@@ -25,32 +20,48 @@ const newPasswordSchema = z.object({
     path: ['passwordConfirm'] // show the error under the confirm field
 });
 
-async function handleSubmit(data: {password: string, passwordConfirm: string}, resetToken: string, setErrors: CallableFunction): Promise<string> {
+async function handleSubmit(
+    data: {password: string, passwordConfirm: string}, 
+    resetToken: string, 
+    setErrors: CallableFunction,
+    user: AuthUser | null): Promise<boolean> {
     const result = newPasswordSchema.safeParse(data);
     if (!result.success) {
         const flat = result.error.flatten();
         setErrors(flat.fieldErrors);
-        return '';
+        return false;
     }
     setErrors(undefined);
-    const user: UserPayload = {
-        id: '1',
-        email: 'user@university.edu',
-        role: "club"
-    };
-    // replace with call to backend, sending resetToken and data.password
-    const token = await simulateGenerateToken(user);
-    return token;
+    
+    // Todo: replace with backend call
+    return true;
 }
 
 export default function NewPassword() {
     const { theme } = useTheme();
+    const {user} = useSession();
     const router = useRouter();
-    const { signIn } = useSession();
+    const { resetToken } = useLocalSearchParams<{ resetToken: string }>();
     const [isPasswordHidden, setPasswordHidden] = useState(true);
     const [password, setPassword] = useState('');
     const [passwordConfirm, setPasswordConfirm] = useState('');
+    const [submitting, setSubmitting] = useState<boolean>(false);
     const [errors, setErrors] = useState<{password?: string[], passwordConfirm?: string[]}>();
+
+    if (!resetToken) {
+        return (
+            <PageContainer>
+                <ButtonHeader onAction={() => router.back()} buttonType='arrow-left' theme={theme}/>
+                <ThemedDisplayTitle fontSize={48} theme={theme} text="reset link" highlight='expired'/>
+                <Text style={{color: theme.muted, fontFamily: fonts.body, marginTop: 10}}>
+                    This password reset is missing or no longer valid. Start again to get a new code.
+                </Text>
+                <View style={{marginTop: spacing.gap}}>
+                    <ArrowButton theme={theme} label='start again' onPress={() => router.replace('/forgot-password-start')}/>
+                </View>
+            </PageContainer>
+        );
+    }
 
     return (
         <PageContainer>
@@ -76,12 +87,20 @@ export default function NewPassword() {
                         onChangeText={setPasswordConfirm}/>
                 </ThemedInputContainer>
                 <View style={{marginTop: spacing.gap}}>
-                    <ArrowButton label='save and log in' theme={theme}
+                    <ArrowButton label='save password' theme={theme}
+                        loading={submitting}
                         disabled={!password || !passwordConfirm}
                         onPress={async () => {
-                            const token = await handleSubmit({password, passwordConfirm}, MOCK_RESET_TOKEN, setErrors);
-                            if (!!token)
-                                signIn(token); // sign in
+                            setSubmitting(true)
+                            try {
+                                const success = await handleSubmit({password, passwordConfirm}, resetToken, setErrors, user);
+                                if (success) {
+                                    Alert.alert('Password updated', user ? 'Your new password is saved.' : 'Log in with your new password.');
+                                    router.dismissAll();
+                                }
+                            } finally {
+                                setSubmitting(false);
+                            }
                         }}/>
                 </View>
             </ScrollableSection>

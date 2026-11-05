@@ -52,6 +52,7 @@ export function RootLayout() {
         </Stack.Protected>
 
         <Stack.Screen name="preferences" />
+        <Stack.Screen name="change-password" />
       </Stack.Protected>
 
       {/* Only non-authenticated users */}
@@ -59,10 +60,11 @@ export function RootLayout() {
         <Stack.Screen name="sign-in" />
         <Stack.Screen name="sign-up" />
         <Stack.Screen name="verify" />
-        <Stack.Screen name="forgot-password-start" />
-        <Stack.Screen name="password-reset-code" />
-        <Stack.Screen name="new-password" />
       </Stack.Protected>
+
+      <Stack.Screen name="forgot-password-start" />
+      <Stack.Screen name="password-reset-code" />
+      <Stack.Screen name="new-password" />
     </Stack>
   );
 }

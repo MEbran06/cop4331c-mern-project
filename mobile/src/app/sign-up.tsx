@@ -83,7 +83,7 @@ export default function SignUp() {
                 label='university email' 
                 error={errors?.email?.at(0)}
                 hint="Use your school email. We'll send a code to confirm you're a student.">
-                <ThemedTextInput placeholder='you@university.edu' value={email} onChangeText={setEmail} theme={theme}/>
+                <ThemedTextInput autoCapitalize="none" keyboardType="email-address" autoComplete="email" placeholder='you@university.edu' value={email} onChangeText={setEmail} theme={theme}/>
             </ThemedInputContainer>
             <ThemedInputContainer theme={theme} 
                     label='password'

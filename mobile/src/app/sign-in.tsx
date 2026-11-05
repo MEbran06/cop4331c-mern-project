@@ -7,10 +7,11 @@ import { useSession } from '@/contexts/ctx';
 import { useRouter } from 'expo-router';
 import * as z from 'zod';
 import { useTheme } from '@/contexts/theme';
-// simulate for now since backend hasn't implemented it
 import { ScrollableSection } from '@/components/ScrollableSection';
 import { ThemedDisplayTitle, ThemedInputContainer, ThemedText, ThemedTextInput } from '@/components/ThemedInputs';
 import { PageContainer } from '@/components/PageContainer';
+import { ApiRequest } from '@events/api';
+import { useApi } from '@/hooks/useApi';
 
 
 const loginFormSchema = z.object({
@@ -21,7 +22,8 @@ const loginFormSchema = z.object({
 async function handleSubmit(
     data: {email: string,  password: string}, 
     setErrors: CallableFunction,
-    SetLoginError: (val?:string)=>void): Promise<string> {
+    SetLoginError: (val?:string)=>void,
+    api: ApiRequest): Promise<string> {
     
     setErrors(undefined);
     SetLoginError(undefined);
@@ -34,18 +36,18 @@ async function handleSubmit(
         return '';
     }
     
-    const res = await fetch(`${process.env.EXPO_PUBLIC_API_URL}/auth/login`, {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(result.data),
-    });
-    const body = await res.json();
+    const res = await api<{ token: string }>('auth/login', { method: 'POST', body: result.data });
     if (!res.ok) {
-        // display error
-        SetLoginError(body.error)
+        SetLoginError(res.error); 
         return '';
     }
-    return body.token;
+    if (res.data)
+        return res.data.token;
+    else {
+        SetLoginError("token not received")
+        return '';
+    }
+
 
 }
 
@@ -60,6 +62,7 @@ export default function SignIn() {
   const [isPasswordHidden, setPasswordHidden] = useState(true);
   const [submitting, setSubmitting] = useState(false);
   const router = useRouter();
+  const api = useApi();
   return (
     <PageContainer>
         <View style={{flexDirection: "row", justifyContent:"space-between"}}>
@@ -73,7 +76,7 @@ export default function SignIn() {
         </Text>
         <View style={{marginTop: 18}}>
             <ThemedInputContainer theme={theme} label='email' error={errors?.email?.at(0)}>
-                <ThemedTextInput placeholder='Email' value={email} onChangeText={setEmail} theme={theme}/>
+                <ThemedTextInput autoCapitalize="none" keyboardType="email-address" autoComplete="email" placeholder='Email' value={email} onChangeText={setEmail} theme={theme}/>
             </ThemedInputContainer>
             <ThemedInputContainer theme={theme} 
                     label='password'
@@ -91,7 +94,7 @@ export default function SignIn() {
                 onPress={async () => {
                     setSubmitting(true);
                     try {
-                        const token = await handleSubmit({email, password}, setErrors, SetLoginError);
+                        const token = await handleSubmit({email, password}, setErrors, SetLoginError, api);
                         if (token) signIn(token);
                     } finally {
                         setSubmitting(false);   // always runs, even if the request throws

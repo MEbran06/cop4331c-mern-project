@@ -52,7 +52,10 @@ export function VerificationBox({theme, value, onChangeText}: VerificationBoxPro
                 }}
                 caretHidden={true}
                 
-                /* keyboardType, maxLength, textContentType, autoComplete */
+                keyboardType="number-pad"
+                textContentType="oneTimeCode"
+                autoComplete="one-time-code"
+
             />
             <Text style={{
                 fontFamily: fonts.body,

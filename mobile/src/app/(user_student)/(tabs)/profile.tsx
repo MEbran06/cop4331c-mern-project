@@ -12,37 +12,40 @@ import { fonts, spacing, Theme } from '@/constants/theme';
 import { ArrowButton } from '@/components/ThemedButton';
 import { ProfileCard } from '@/components/ProfileCard';
 import { SettingsRow } from '@/components/SettingsRow';
+import { useApi } from '@/hooks/useApi';
 
 export default function FollowingPage() {
     const { theme } = useTheme();
     const style = useMemo(() => styleGen(theme), [theme]);
     const {session, user, signOut} = useSession();
     const [profile, SetProfile] = useState<StudentProfile>();
+    const [error, setError] = useState<string>();
     const router = useRouter();
+    const api = useApi();
 
     useFocusEffect(useCallback(()=>{
 
         let active = true;
 
-        if (!user || !session) 
+        if (!user) 
             return ()=>{active=false;};
 
         // make call to api to fetch user profile
-        fetchProfile(user.id, session).then((profile)=>{
+        fetchProfile(user.id, api).then((profile)=>{
             if (!active) return;
             SetProfile(profile);
-        })
+        }).catch(() => { if (active) setError("User profile not found.") });
 
         return ()=>{active=false;};
 
-    }, [user, session]));
+    }, [user, api]));
 
     if (!profile) {
         return (
             <PageContainer>
                 <ThemedDisplayTitle fontSize={48} theme={theme} text="profile not" highlight="found"/>
                 <Text style={style.notFoundText}>
-                    User profile not found.
+                    {error}
                 </Text>
             </PageContainer>
         );
@@ -69,7 +72,7 @@ export default function FollowingPage() {
                         theme={theme} icon='lock'
                         title='Change password'
                         style={{ borderTopWidth: theme.borderWidth, borderTopColor: theme.ink }}
-                        onPress={undefined}/>
+                        onPress={()=>router.push('/change-password')}/>
                 </View>
             </HardShadow>
             <View style={{marginTop:spacing.gap}}>

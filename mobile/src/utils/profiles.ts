@@ -1,3 +1,5 @@
+import { ApiRequest } from "@events/api";
+
 export interface StudentProfile {
     id: string;
     name: string;
@@ -5,10 +7,9 @@ export interface StudentProfile {
     //bio?: string;
 }
 
-export async function fetchProfile(userId: string, token: string): Promise<StudentProfile> {
-    const res = await fetch(`${process.env.EXPO_PUBLIC_API_URL}/users/${userId}`, {
-        headers: { Authorization: `Bearer ${token}` },
-    });
+export async function fetchProfile(userId: string, api: ApiRequest): Promise<StudentProfile> {
+    const res = await api<StudentProfile>(`users/${userId}`);
     if (!res.ok) throw new Error("Could not retrieve user profile");
-    return res.json();
+    if (!res.data) throw new Error("No user profile data")
+    return res.data;
 }
