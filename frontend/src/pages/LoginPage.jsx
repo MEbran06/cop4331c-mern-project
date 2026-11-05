@@ -9,8 +9,12 @@ export default function LoginPage() {
   const handleLogin = async (e) => {
     e.preventDefault();
     
+    const API_URL = window.location.hostname === 'localhost' 
+      ? 'http://localhost:5000/api/auth/login' 
+      : '/api/auth/login';
+
     try {
-      const response = await fetch('http://localhost:5000/api/auth/login', {
+      const response = await fetch(API_URL, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',

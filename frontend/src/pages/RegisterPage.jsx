@@ -12,8 +12,13 @@ export default function RegisterPage() {
   const handleRegister = async (e) => {
     e.preventDefault();
     
+    // Dynamically choose API URL based on where it's running
+    const API_URL = window.location.hostname === 'localhost' 
+      ? 'http://localhost:5000/api/users' 
+      : '/api/users';
+
     try {
-      const response = await fetch('http://localhost:5000/api/users', {
+      const response = await fetch(API_URL, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
