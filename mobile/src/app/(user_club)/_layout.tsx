@@ -1,6 +1,11 @@
 import { Stack } from 'expo-router';
 
-export default function AppLayout() {
+export default function StudentLayout() {
   // This renders the navigation stack for all authenticated app routes.
-  return <Stack />;
+  return (
+    <Stack screenOptions={{ headerShown: false }}>
+        <Stack.Screen name="(tabs)" />
+    </Stack>
+
+  );
 }

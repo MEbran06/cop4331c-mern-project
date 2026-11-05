@@ -3,8 +3,9 @@ import React from 'react';
 import { Pressable, StyleProp, Text, View, ViewStyle } from 'react-native';
 import { ArrowLeftIcon, ArrowRightIcon, EyeIcon, EyeOffIcon } from './icons';
 import { HardShadow } from './decor';
-import { Theme, fonts, spacing } from '../constants/theme';
+import { Theme, fonts, spacing, themes } from '../constants/theme';
 import Feather from '@react-native-vector-icons/feather';
+import Lucide from '@react-native-vector-icons/lucide';
 
 // 'primary' = orange (Log in, Publish), 'plain' = white (bell, back, secondary actions)
 export type ButtonVariant = 'primary' | 'plain';
@@ -253,5 +254,54 @@ export function FollowButton({isFollowing, onPress, ...rest}: FollowButtonProps)
                         "Follow to see their events in your feed and get their surveys."}
         </Text>
         </View>
+    );
+}
+
+type EditProfileProps = Omit<ThemedButtonProps, 'children' | 'style' | 'variant'> & {
+    onPress : ()=>void;
+    isEditing: boolean; // false: "edit profile" with a pencil, true: "save" with a check
+};
+
+
+export function EditProfileButton({onPress, isEditing, theme, ...rest}:EditProfileProps) {
+    const label = isEditing ? 'save' : 'edit profile';
+    return (
+        <ThemedButton
+            {...rest}  // passes loading, disabled, shadow options through
+            theme={theme}
+            accessibilityLabel={rest.accessibilityLabel ?? label}
+            style={{ minHeight: spacing.buttonHeight, flexDirection: 'row' }}
+            variant={isEditing ? 'primary' : 'plain'}
+            onPress={onPress}>
+            {({ loading, textColor }) => (
+                <>
+                    <View
+                        style={{
+                        width: spacing.arrowBlock,
+                        alignItems: 'center',
+                        justifyContent: 'center',
+                        backgroundColor: theme.hi,
+                        borderRightWidth: theme.borderWidth,
+                        borderColor: theme.ink,
+                        }}
+                    >
+                        <Lucide name={isEditing ? 'check' : 'pencil'} color={theme.onHi} size={22}/>
+                    </View>
+                    <View style={{ flex: 1, alignItems: 'center', justifyContent: 'center', paddingHorizontal: 12 }}>
+                        <Text
+                            style={{
+                            fontFamily: fonts.label,
+                            fontSize: 20,
+                            letterSpacing: 1.2,
+                            textTransform: 'uppercase',
+                            color: textColor,
+                            }}
+                        >
+                            {loading ? 'One sec…' : label}
+                        </Text>
+                    </View>
+                </>
+            )}
+        </ThemedButton>
     );
 }

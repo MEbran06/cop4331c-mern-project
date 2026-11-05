@@ -117,13 +117,36 @@ interface ThemedDisplayTitleProps {
     highlightedFirst?: boolean,
     theme: Theme,
     fontSize?: number,
-    inline?: boolean
+    inline?: boolean,
+    editable?: boolean;               // swaps the title for an input with the same look
+    onChangeText?: (text: string) => void;
+    placeholder?: string;             // shown (and read by screen readers) while editing
+
 }
 
-export function ThemedDisplayTitle({text, highlight, highlightedFirst=false, theme, fontSize = 60, inline=false}: ThemedDisplayTitleProps) {
+export function ThemedDisplayTitle({text, highlight, highlightedFirst=false, theme, fontSize = 60, inline=false,
+    editable=false, onChangeText, placeholder}: ThemedDisplayTitleProps) {
     const styles = useMemo(() => {
-        return stylesGen(theme, fontSize); 
+        return stylesGen(theme, fontSize);
     }, [theme, fontSize]);
+
+    if (editable) {
+        // textTransform doesn't apply to TextInput, so this shows what they actually typed
+        return (
+            <View style={{marginTop: spacing.gap}}>
+                <TextInput
+                    value={text}
+                    onChangeText={onChangeText}
+                    placeholder={placeholder}
+                    placeholderTextColor={theme.muted}
+                    accessibilityLabel={placeholder}
+                    multiline                       // wraps like the Text version
+                    submitBehavior="blurAndSubmit"  // Enter closes the keyboard instead of adding a line
+                    style={[styles.DisplayText, styles.displayInput]}/>
+            </View>
+        );
+    }
+
     return (
         <View style={[{marginTop: spacing.gap}, (inline? {flexDirection:"row", alignItems:"center"}: {})]}>
             {highlightedFirst && !!highlight && <Highlight background={theme.hi} textStyle={styles.DisplayText}>{highlight}</Highlight>}
@@ -138,8 +161,17 @@ const stylesGen = (theme: Theme, size: number = 60) => {
     return StyleSheet.create({
         DisplayText: {
             fontFamily: fonts.display, 
-            fontSize: size, 
-            textTransform: 'uppercase'
+            fontSize: size,
+            textTransform: 'uppercase',
+            color: theme.ink
+        },
+        displayInput: {
+            borderWidth: theme.borderWidth,
+            borderColor: theme.ink,
+            backgroundColor: theme.paper,
+            paddingHorizontal: 10,
+            paddingVertical: 4,
+            textAlignVertical: 'top' // Android centres multiline text by default
         },
         input: { 
             flex: 1,  
