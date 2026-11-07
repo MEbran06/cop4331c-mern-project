@@ -305,3 +305,43 @@ export function EditProfileButton({onPress, isEditing, theme, ...rest}:EditProfi
         </ThemedButton>
     );
 }
+
+type CreateButtonProps = Omit<ThemedButtonProps, 'children' | 'style' | 'variant'> & {
+    onPress : ()=>void;
+    label: string;
+};
+
+export function CreateButton({onPress, label, ...rest}: CreateButtonProps) {
+    return (
+        <ThemedButton theme={rest.theme}
+            accessibilityLabel={`new ${label}`}
+            style={{ minHeight: spacing.buttonHeight, flexDirection: "row" }}
+            variant="primary"
+            onPress={onPress}>
+            <View
+                style={{
+                width: spacing.arrowBlock,
+                alignItems: 'center',
+                justifyContent: 'center',
+                backgroundColor: rest.theme.arrowBg,
+                borderLeftWidth: rest.theme.borderWidth,
+                borderRightWidth: rest.theme.borderWidth,
+                borderColor: rest.theme.ink,
+                }}
+            >
+                <Feather name='plus' size={20} color={rest.theme.card}/>
+            </View>
+            <View style={{ flex: 1, alignItems: 'center', justifyContent: 'center', paddingHorizontal: 12 }}>
+                <Text style={{
+                  fontFamily: fonts.label,
+                  fontSize: 20,
+                  letterSpacing: 1.2,
+                  textTransform: 'uppercase',
+                  color: rest.theme.ink,
+                }}>
+                    {`new ${label}`}
+                </Text>
+            </View>
+        </ThemedButton>
+    );
+}
