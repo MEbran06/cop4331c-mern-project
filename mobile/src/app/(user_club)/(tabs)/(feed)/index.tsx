@@ -9,14 +9,10 @@ import { useCallback, useMemo, useState } from 'react';
 import { CreateButton } from '@/components/ThemedButton';
 import { useFocusEffect, useRouter } from 'expo-router';
 import { ClubPastEventRow, ClubUpcomingEventCard, SeeAllRow } from '@/components/ClubEventCard';
-import { ClubManagedEvent, getEventStatus } from '@/utils/events';
+import { ClubManagedEvent } from '@/utils/events';
 import { getClubManagedEvents } from '@/utils/mockEvents';
 import { useSession } from '@/contexts/ctx';
 import { useApi } from '@/hooks/useApi';
-
-function startTime(event: ClubManagedEvent): number {
-    return new Date(event.startsAt).getTime();
-}
 
 export default function Index() {
   const {theme} = useTheme();
@@ -41,6 +37,7 @@ export default function Index() {
             getClubManagedEvents(user.id, api, { when: 'past', limit: 5 }),
         ]).then(([upcomingPage, pastPage]) => {
             if (!active) return;
+            setError(''); // clears a failed earlier attempt
             setUpcoming(upcomingPage.events);
             setPast(pastPage.events);
             setPastTotal(pastPage.total);
@@ -65,6 +62,10 @@ export default function Index() {
         <ScrollableSection>
             {loading ? ( 
                 <ActivityIndicator style={{ marginTop: 40 }} color={theme.ink} />
+            ) : error ? (
+                <View style={style.section}>
+                    <Text style={style.emptyText}>{error}</Text>
+                </View>
             ) :(
             <>
             <View style={style.section}>

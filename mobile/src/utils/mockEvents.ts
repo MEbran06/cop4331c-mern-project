@@ -83,7 +83,6 @@ export const MOCK_EVENTS: ClubEvent[] = [
     startsAt: hoursFromNow(-1),
     endsAt: hoursFromNow(1),
     location: 'Library, Room 104',
-    subtitle: '5-minute games, all skill levels',
     description: 'Drop in for fast-paced blitz games. Boards and clocks provided, so just bring yourself. Beginners welcome, we pair by rating.',
     survey: {
       id: 'srv-4',
@@ -109,7 +108,6 @@ export const MOCK_EVENTS: ClubEvent[] = [
     startsAt: hoursFromNow(-20),
     endsAt: hoursFromNow(-17),
     location: 'Student Union Theater',
-    subtitle: 'Screening: Back to the Future (1985)',
     description: 'Our October throwback screening. Free popcorn while it lasts, and bring a friend. Doors open 15 minutes before the film starts.',
     survey: {
       id: 'srv-1',
@@ -183,7 +181,6 @@ export const MOCK_EVENTS: ClubEvent[] = [
     startsAt: hoursFromNow(-9 * 24),
     endsAt: hoursFromNow(-9 * 24 + 3),
     location: 'Student Union Café',
-    subtitle: 'Music, poetry and comedy',
     description: 'Sign up at the door for a 5-minute slot, or just come to listen. Sound system and a house guitar available.',
     survey: {
       id: 'srv-3',
@@ -284,7 +281,6 @@ const MOCK_CLUB_EVENTS: ClubManagedEvent[] = [
         startsAt: hoursFromNow(-1),
         endsAt: hoursFromNow(1),
         location: 'Library, Room 104',
-        subtitle: '5-minute games, all skill levels',
         description: 'Drop in for fast-paced blitz games. Boards and clocks provided, so just bring yourself. Beginners welcome, we pair by rating.',
         survey: {
             id: 'srv-4',
@@ -439,4 +435,11 @@ export async function getClubManagedEvents(
         events:sorted.slice(skip, skip + limit),
         total: matching.length,
     };
+}
+
+export async function getClubManagedEvent(eventId: string, api: ApiRequest) : Promise<ClubManagedEvent>{
+    const found = MOCK_CLUB_EVENTS.find((event)=>event.id===eventId)
+    if (!found) throw new Error("Event not found");
+    return { ...found };
+
 }

@@ -53,13 +53,8 @@ export default function Dashboard() {
 
   return (
     <PageContainer>
-        <ButtonHeader onAction={() => null}
-             buttonType='notification' theme={theme}
-             buttonOnLeft={false}
-             style={{marginBottom:0}}>
-            <DotGrid color={theme.ink} />
-        </ButtonHeader>
-        <ThemedDisplayTitle fontSize={35} theme={theme} text="what's on" highlight='this week' inline={true}/>
+        <DotGrid color={theme.ink} />
+        <ThemedDisplayTitle fontSize={40} theme={theme} text="what's on" highlight='this week' inline={true}/>
         <View style={{ flexDirection: 'row', alignItems: 'center', gap: 8, marginTop: spacing.gap }}>
             <CheckerStrip columns={8} ink={theme.ink} background={theme.card} />
             <View style={style.clubTag}>

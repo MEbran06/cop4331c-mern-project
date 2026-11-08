@@ -1,4 +1,4 @@
-import { StyleSheet, Text, View } from 'react-native';
+import { ActivityIndicator, StyleSheet, Text, View } from 'react-native';
 
 import { useSession } from '@/contexts/ctx';
 import { PageContainer } from '@/components/PageContainer';
@@ -39,6 +39,15 @@ export default function FollowingPage() {
         return ()=>{active=false;};
 
     }, [user, api]));
+
+    // no profile and no error means it's still loading
+    if (!profile && !error) {
+        return (
+            <PageContainer>
+                <ActivityIndicator style={{ marginTop: 40 }} color={theme.ink}/>
+            </PageContainer>
+        );
+    }
 
     if (!profile) {
         return (

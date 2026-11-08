@@ -39,20 +39,20 @@ function surveyStatus(survey: ClubSurvey | undefined) {
     return survey.status;
 }
 
-function resolveSurveyLinkInfo(survey: ClubSurvey | undefined): {
+function resolveSurveyLinkInfo(survey: ClubSurvey | undefined, eventId: string): {
     label: string,
     href: Href
 } {
     if (!survey) {
-        return { label: "add survey", href: "/(user_club)/survey/create" };
+        return { label: "add survey", href: "/(user_club)/event/[eventId]/survey/create" };
     }
 
     if (survey.status === "closed") {
         return {
             label: "survey results",
             href: {
-                pathname: "/(user_club)/survey/[surveyId]/results",
-                params: { surveyId: survey.id },
+                pathname: "/(user_club)/event/[eventId]/survey/results",
+                params: { eventId: eventId},
             },
         };
     }
@@ -60,8 +60,8 @@ function resolveSurveyLinkInfo(survey: ClubSurvey | undefined): {
     return {
         label: "edit survey",
         href: {
-            pathname: "/(user_club)/survey/[surveyId]/edit",
-            params: { surveyId: survey.id },
+            pathname: "/(user_club)/event/[eventId]/survey/edit",
+            params: { eventId: eventId },
         },
     };
 }
@@ -81,7 +81,7 @@ export function ClubUpcomingEventCard({theme, event, onEditClick}: Props) {
     const start = new Date(event.startsAt);
     const end = new Date(event.endsAt);
     const router = useRouter();
-    const {label, href} = resolveSurveyLinkInfo(event.survey);
+    const {label, href} = resolveSurveyLinkInfo(event.survey, event.id);
     return (
         <HardShadow>
             <View style={style.CardContainer}>
@@ -134,7 +134,7 @@ export function ClubUpcomingEventCard({theme, event, onEditClick}: Props) {
 }
 
 // Only surveys that were published can have results, so anything else has no href.
-function resolvePastSurveyInfo(survey: ClubSurvey | undefined): {
+function resolvePastSurveyInfo(survey: ClubSurvey | undefined, eventId: string): {
     summary: string,
     isDraft: boolean,
     href?: Href
@@ -152,8 +152,8 @@ function resolvePastSurveyInfo(survey: ClubSurvey | undefined): {
         summary: `survey ${survey.status} · ${responses}`,
         isDraft: false,
         href: {
-            pathname: "/(user_club)/survey/[surveyId]/results",
-            params: { surveyId: survey.id },
+            pathname: "/(user_club)/event/[eventId]/survey/results",
+            params: { eventId: eventId },
         },
     };
 }
@@ -169,7 +169,7 @@ export function ClubPastEventRow({theme, event, style: outerStyle}: PastRowProps
     const style = useMemo(()=>pastStyleGen(theme), [theme]);
     const router = useRouter();
     const {month, day} = formatDate(event.startsAt);
-    const {summary, isDraft, href} = resolvePastSurveyInfo(event.survey);
+    const {summary, isDraft, href} = resolvePastSurveyInfo(event.survey, event.id);
 
     return (
         <Pressable

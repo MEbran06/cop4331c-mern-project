@@ -1,4 +1,4 @@
-import { Pressable, StyleSheet, Text, TextInput, View } from 'react-native';
+import { ActivityIndicator, Pressable, StyleSheet, Text, TextInput, View } from 'react-native';
 import { useSession } from '@/contexts/ctx';
 import { useTheme } from '@/contexts/theme';
 import { useCallback, useMemo, useState } from 'react';
@@ -93,6 +93,15 @@ export default function ClubProfilePage() {
   
       }, [user, api]));
   
+      // no profile and no error means it's still loading
+      if (!profile && !error) {
+          return (
+              <PageContainer>
+                  <ActivityIndicator style={{ marginTop: 40 }} color={theme.ink}/>
+              </PageContainer>
+          );
+      }
+
       if (!profile) {
           return (
               <PageContainer>

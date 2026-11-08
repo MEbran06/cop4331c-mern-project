@@ -47,7 +47,6 @@ export interface BaseEvent {
     startsAt: string;        
     endsAt: string;          
     location?: string;        
-    subtitle ?: string;
     description ?: string; 
 }
 
