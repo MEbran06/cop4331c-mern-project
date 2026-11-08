@@ -200,7 +200,47 @@ export function ClubPastEventRow({theme, event, style: outerStyle}: PastRowProps
     );
 }
 
+interface SeeAllRowProps {
+    theme: Theme;
+    label: string;
+    onPress: () => void;
+    style?: StyleProp<ViewStyle>; // lets the list add a divider above it
+}
+
+// The last row of a list, for when there are more items than the list shows.
+export function SeeAllRow({theme, label, onPress, style: outerStyle}: SeeAllRowProps) {
+    const style = useMemo(()=>pastStyleGen(theme), [theme]);
+
+    return (
+        <Pressable
+            onPress={onPress}
+            accessibilityRole="button"
+            accessibilityLabel={label}
+            style={({ pressed }) => [style.seeAllRow, pressed && { backgroundColor: theme.paper }, outerStyle]}
+            >
+            <Text style={style.seeAllText}>{label}</Text>
+            <Lucide name="chevron-right" size={24} color={theme.ink}/>
+        </Pressable>
+    );
+}
+
 const pastStyleGen = (theme: Theme) => StyleSheet.create({
+    seeAllRow: {
+        flexDirection: "row",
+        alignItems: "center",
+        justifyContent: "space-between",
+        minHeight: 52,
+        paddingVertical: 12,
+        paddingHorizontal: 14,
+        backgroundColor: theme.card
+    },
+    seeAllText: {
+        fontFamily: fonts.label,
+        fontSize: 14,
+        letterSpacing: 1,
+        textTransform: "uppercase",
+        color: theme.ink
+    },
     row: {
         flexDirection: "row",
         alignItems: "center",

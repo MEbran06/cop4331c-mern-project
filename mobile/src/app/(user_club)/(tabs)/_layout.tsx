@@ -9,7 +9,7 @@ export default function ClubLayout() {
   // This renders the navigation stack for all authenticated app routes.
   return (
    <TabContainer theme={theme}>
-        <Tabs.Screen name="index" options={{ title: 'feed', tabBarIcon: ({ color, size }) => <Lucide name="calendar" color={color} size={size} /> }} />
+        <Tabs.Screen name="(feed)" options={{ title: 'feed', tabBarIcon: ({ color, size }) => <Lucide name="calendar" color={color} size={size} /> }} />
         <Tabs.Screen name="profile" options={{ title: 'profile', tabBarIcon: ({ color, size }) => <Ionicons name="person-outline" color={color} size={size} /> }} />
     </TabContainer>
   );
