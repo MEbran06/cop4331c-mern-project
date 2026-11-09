@@ -1,7 +1,6 @@
 import { StyleSheet, Text, View } from 'react-native';
 
 import { PageContainer } from '@/components/PageContainer';
-import { ButtonHeader } from '@/components/ButtonHeader';
 import { useRouter } from 'expo-router';
 import { useTheme } from '@/contexts/theme';
 import { CheckerStrip, DotGrid } from '@/components/decor';

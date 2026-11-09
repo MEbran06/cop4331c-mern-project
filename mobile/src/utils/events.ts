@@ -25,7 +25,6 @@ interface SurveyBase {
   id: string;
   title: string;
   questions: SurveyQuestion[];
-  closesAt?: string;
   status: SurveyStatusType;
 }
 
@@ -60,6 +59,21 @@ export interface ClubManagedEvent extends BaseEvent{
 
 export type EventStatus = 'live' | 'upcoming' | 'past';
 
+
+export type SurveyQuestionResult =
+    | { questionId: string; text: string; type: "text"; answeredCount: number; answers: string[] }
+    | { questionId: string; text: string; type: "single_choice" | "multiple_choice"; answeredCount: number;
+        options: { label: string; count: number }[] };
+
+export interface SurveyResults {
+    id: string;
+    title: string;
+    status: SurveyStatusType;
+    responseCount: number;
+    questions: SurveyQuestionResult[];
+}
+
+
 // Worked out on the device from the timestamps
 export function getEventStatus(event: BaseEvent, now: Date = new Date()): EventStatus {
   if (now < new Date(event.startsAt)) return 'upcoming';
@@ -67,18 +81,14 @@ export function getEventStatus(event: BaseEvent, now: Date = new Date()): EventS
   return 'live';
 }
 
-export function isSurveyAvailable(event: ClubEvent|ClubManagedEvent, now: Date = new Date()): boolean {
+export function isSurveyAvailable(event: ClubEvent|ClubManagedEvent): boolean {
     if (!event.survey)
         return false;
 
-    if ("completed" in event.survey )
-        return !event.survey.completed && 
-                (!event.survey.closesAt || now < new Date(event.survey.closesAt)) && 
-                event.survey.status === 'open';
-    else {
-        return (!event.survey.closesAt || now < new Date(event.survey.closesAt)) && 
-                event.survey.status === 'open';
-    }
+    if ("completed" in event.survey)
+        return !event.survey.completed && event.survey.status === 'open';
+
+    return event.survey.status === 'open';
 }
 
 export function formatDate(iso: string) {

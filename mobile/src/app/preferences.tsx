@@ -43,7 +43,6 @@ const MOCK_EVENT: ClubEvent = {
       id: 'srv-1',
       title: 'How was Movie Night?',
       status: 'open',
-      closesAt: hoursFromNow(48),
       completed: false,
       questions: [
         {

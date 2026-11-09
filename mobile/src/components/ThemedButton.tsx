@@ -3,7 +3,7 @@ import React from 'react';
 import { Pressable, StyleProp, Text, View, ViewStyle } from 'react-native';
 import { ArrowLeftIcon, ArrowRightIcon, EyeIcon, EyeOffIcon } from './icons';
 import { HardShadow } from './decor';
-import { Theme, fonts, spacing, themes } from '../constants/theme';
+import { Theme, fonts, spacing } from '../constants/theme';
 import Feather from '@react-native-vector-icons/feather';
 import Lucide from '@react-native-vector-icons/lucide';
 

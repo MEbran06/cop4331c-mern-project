@@ -53,7 +53,7 @@ const eventSchema = new Schema(
     title: { type: String, required: true, trim: true },
     description: { type: String, default: "" },
     startsAt: { type: Date, required: true },
-    endsAt: { type: Date },
+    endsAt: { type: Date, required: true },
     location: { type: String, default: "" },
   },
   { timestamps: true }
@@ -61,7 +61,7 @@ const eventSchema = new Schema(
 
 const surveyQuestionSchema = new Schema(
   {
-    text: { type: String, required: true, trim: true },
+    text: { type: String, required:  function () { return this.ownerDocument().status !== "draft";}, trim: true },
     type: {
       type: String,
       enum: ["text", "single_choice", "multiple_choice"],
@@ -73,12 +73,13 @@ const surveyQuestionSchema = new Schema(
       // Validate choice questions have options.
       validate: {
         validator: function (options) {
-          return (
-            !["single_choice", "multiple_choice"].includes(this.type) ||
-            options.length > 0
-          );
+            if (this.ownerDocument().status === "draft") return true;
+            return (
+                !["single_choice", "multiple_choice"].includes(this.type) ||
+                options.length > 1
+            );
         },
-        message: "Choice questions must have at least one option.",
+        message: "Choice questions must have at least two options.",
       },
     },
     required: { type: Boolean, default: false },
@@ -94,12 +95,13 @@ const surveySchema = new Schema(
       required: true,
       unique: true, // At most one survey per event.
     },
-    title: { type: String, required: true, trim: true },
+    title: { type: String, required: function () { return this.status !== "draft"; }, trim: true },
+    status: { type: String, enum: ["draft", "open", "closed"], default: "draft", required: true },
     questions: {
       type: [surveyQuestionSchema],
       default: [],
       validate: {
-        validator: (questions) => questions.length > 0,
+        validator: function (questions) { return this.status === "draft" || questions.length > 0; },
         message: "A survey must have at least one question.",
       },
     },

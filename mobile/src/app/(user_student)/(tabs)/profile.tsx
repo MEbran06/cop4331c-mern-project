@@ -17,7 +17,7 @@ import { useApi } from '@/hooks/useApi';
 export default function FollowingPage() {
     const { theme } = useTheme();
     const style = useMemo(() => styleGen(theme), [theme]);
-    const {session, user, signOut} = useSession();
+    const {user, signOut} = useSession();
     const [profile, SetProfile] = useState<StudentProfile>();
     const [error, setError] = useState<string>();
     const router = useRouter();

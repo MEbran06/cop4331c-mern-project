@@ -2,7 +2,7 @@
 // Sample events to build the feed before the backend exists.
 // Dates are relative to "now", so there's always one live, some past and some upcoming event.
 import { ApiRequest } from '@events/api';
-import { Club, ClubEvent, ClubManagedEvent } from './events';
+import { Club, ClubEvent, ClubManagedEvent, SurveyResults } from './events';
 
 const HOUR = 60 * 60 * 1000;
 
@@ -76,7 +76,7 @@ export const MOCK_CLUBS: Club[] = Object.values(clubs);
 export const MOCK_EVENTS: ClubEvent[] = [
   {
     // live: started an hour ago, ends in an hour
-    // survey open with no closesAt -> stays open until the club closes it -> shows the survey button
+    // survey open -> stays open until the club closes it -> shows the survey button
     id: 'evt-1',
     title: 'Blitz Night',
     club: clubs.chess,
@@ -113,7 +113,6 @@ export const MOCK_EVENTS: ClubEvent[] = [
       id: 'srv-1',
       title: 'How was Movie Night?',
       status: 'open',
-      closesAt: hoursFromNow(48),
       completed: false,
       questions: [
         {
@@ -153,7 +152,6 @@ export const MOCK_EVENTS: ClubEvent[] = [
       id: 'srv-2',
       title: 'Sunrise Hike feedback',
       status: 'open',
-      closesAt: hoursFromNow(24),
       completed: true,
       questions: [
         {
@@ -174,7 +172,7 @@ export const MOCK_EVENTS: ClubEvent[] = [
     },
   },
   {
-    // past, survey closed automatically when closesAt passed -> no button
+    // past, club closed the survey -> no button
     id: 'evt-4',
     title: 'Open Mic',
     club: clubs.music,
@@ -186,7 +184,6 @@ export const MOCK_EVENTS: ClubEvent[] = [
       id: 'srv-3',
       title: 'Open Mic feedback',
       status: 'closed',
-      closesAt: hoursFromNow(-2 * 24),
       completed: false,
       questions: [
         {
@@ -234,7 +231,7 @@ export const MOCK_EVENTS: ClubEvent[] = [
     },
   },
   {
-    // past, club closed the survey early (closesAt is still in the future) -> no button
+    // past, club closed the survey -> no button
     id: 'evt-7',
     title: 'Karaoke Night',
     club: clubs.music,
@@ -246,7 +243,6 @@ export const MOCK_EVENTS: ClubEvent[] = [
       id: 'srv-6',
       title: 'Karaoke Night feedback',
       status: 'closed',
-      closesAt: hoursFromNow(4 * 24),
       completed: false,
       questions: [
         {
@@ -366,6 +362,82 @@ const MOCK_CLUB_EVENTS: ClubManagedEvent[] = [
     },
 ];
 
+// Results by event id. Only published surveys are here, because drafts have no results.
+const MOCK_SURVEY_RESULTS: Record<string, SurveyResults> = {
+    'evt-3': {
+        // closed, with an optional multiple choice and written answers
+        id: 'srv-5',
+        title: 'Fall Tournament feedback',
+        status: 'closed',
+        responseCount: 27,
+        questions: [
+            {
+                questionId: 'q-5-1',
+                text: 'How was the tournament overall?',
+                type: 'single_choice',
+                answeredCount: 27,
+                options: [
+                    { label: 'Great', count: 14 },
+                    { label: 'Good', count: 9 },
+                    { label: 'Okay', count: 3 },
+                    { label: 'Poor', count: 1 },
+                ],
+            },
+            {
+                questionId: 'q-5-2',
+                text: 'What did you like?',
+                type: 'multiple_choice',
+                answeredCount: 22,
+                options: [
+                    { label: 'Pairings', count: 12 },
+                    { label: 'Prizes', count: 15 },
+                    { label: 'Venue', count: 7 },
+                    { label: 'Snacks', count: 10 },
+                ],
+            },
+            {
+                questionId: 'q-5-3',
+                text: 'What should we change next time?',
+                type: 'text',
+                answeredCount: 4,
+                answers: [
+                    'Longer breaks between rounds.',
+                    'More tables, it got crowded near the end.',
+                    'Post the pairings online.',
+                    'Please keep the snacks!',
+                ],
+            },
+        ],
+    },
+    'evt-4': {
+        // open, with one response and a written question nobody answered
+        id: 'srv-6',
+        title: 'Endgame Workshop feedback',
+        status: 'open',
+        responseCount: 1,
+        questions: [
+            {
+                questionId: 'q-6-1',
+                text: 'Was the workshop at the right level?',
+                type: 'single_choice',
+                answeredCount: 1,
+                options: [
+                    { label: 'Too easy', count: 0 },
+                    { label: 'Just right', count: 1 },
+                    { label: 'Too hard', count: 0 },
+                ],
+            },
+            {
+                questionId: 'q-6-2',
+                text: 'Any topics for next time?',
+                type: 'text',
+                answeredCount: 0,
+                answers: [],
+            },
+        ],
+    },
+};
+
 
 // ---------------------------------------------------------------------------
 // Mock API: stands in for the backend until the real endpoints exist.
@@ -442,4 +514,12 @@ export async function getClubManagedEvent(eventId: string, api: ApiRequest) : Pr
     if (!found) throw new Error("Event not found");
     return { ...found };
 
+}
+
+export async function getSurveyResults(eventId: string, api: ApiRequest): Promise<SurveyResults> {
+    await new Promise((resolve) => setTimeout(resolve, 300)); // fake network delay
+
+    const found = MOCK_SURVEY_RESULTS[eventId];
+    if (!found) throw new Error("Survey results not found");
+    return { ...found };
 }

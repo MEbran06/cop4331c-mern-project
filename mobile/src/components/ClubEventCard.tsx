@@ -44,10 +44,17 @@ function resolveSurveyLinkInfo(survey: ClubSurvey | undefined, eventId: string):
     href: Href
 } {
     if (!survey) {
-        return { label: "add survey", href: "/(user_club)/event/[eventId]/survey/create" };
+        return {
+            label: "add survey",
+            href: {
+                pathname: "/(user_club)/event/[eventId]/survey/create",
+                params: { eventId },
+            },
+        };
+
     }
 
-    if (survey.status === "closed") {
+    if (survey.status !== "draft") {
         return {
             label: "survey results",
             href: {
