@@ -60,15 +60,19 @@ export default function DashboardPage() {
               </div>
             </div>
             
-            <div style={{ padding: '0 1rem 1rem 1rem' }}>
-              <button className="brutalist-button" style={{ width: '100%' }}>
+            <div style={{ padding: '0 1rem 1rem 1rem', display: 'flex', gap: '0.5rem' }}>
+              <button className="brutalist-button" style={{ flex: 1 }}>
                 VIEW & COMMENT →
               </button>
+              {userRole==='club' && (
+                <button className="brutalist-button" style={{ flex: 1,backgroundColor:'#000000',color:'#FFFFFF'}}>
+                  EDIT EVENT
+                </button>
+              )}
             </div>
           </div>
         ))}
       </div>
-
     </div>
   );
 }
@@ -107,7 +111,7 @@ const styles = {
     fontSize:'0.85rem',
     marginTop:'0',
     backgroundColor:'#000000',
-    backgroundColor:'#FFFFFF',
+    color:'#FFFFFF',
   },
   adminPanel: {
     width:'100%',
