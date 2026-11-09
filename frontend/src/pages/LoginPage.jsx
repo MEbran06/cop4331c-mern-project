@@ -22,6 +22,10 @@ export default function LoginPage() {
       const data = await response.json();
 
       if (response.ok) {
+        localStorage.setItem('role', data.user.role);
+        if (data.token) {
+           localStorage.setItem('token', data.token);
+        }
         navigate('/dashboard');
       } else {
         alert(`Login failed: ${data.error || 'Invalid credentials'}`);
