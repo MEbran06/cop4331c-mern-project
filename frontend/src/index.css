@@ -109,3 +109,9 @@ code {
   padding: 4px 8px;
   background: var(--code-bg);
 }
+body, #root {
+  background-color: #F3F3F3 !important;
+  width: 100% !important;
+  max-width: 100% !important;
+  border: none !important;
+}
