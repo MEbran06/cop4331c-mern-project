@@ -182,3 +182,11 @@
     border-right-color: var(--border);
   }
 }
+
+body, #root {
+  margin:0;
+  padding:0;
+  max-width:100%;
+  min-height:100vh;
+  background-color:#F3F3F3 !important;
+}
