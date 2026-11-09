@@ -38,13 +38,11 @@ const MOCK_EVENT: ClubEvent = {
     startsAt: hoursFromNow(-20),
     endsAt: hoursFromNow(-17),
     location: 'Student Union Theater',
-    subtitle: 'Screening: Back to the Future (1985)',
     description: 'Our October throwback screening. Free popcorn while it lasts, and bring a friend. Doors open 15 minutes before the film starts.',
     survey: {
       id: 'srv-1',
       title: 'How was Movie Night?',
       status: 'open',
-      closesAt: hoursFromNow(48),
       completed: false,
       questions: [
         {

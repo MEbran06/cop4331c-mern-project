@@ -21,41 +21,74 @@ export interface SurveyQuestion {
   required: boolean;
 }
 
-export interface EventSurvey {
+interface SurveyBase {
   id: string;
   title: string;
   questions: SurveyQuestion[];
-  closesAt?: string;         // when the survey stops accepting answers
   status: SurveyStatusType;
-  completed: boolean;       // whether the user already answered
 }
 
-export interface ClubEvent {
+// What students get. The name stays the same, so student code doesn't change.
+export interface EventSurvey extends SurveyBase {
+  completed: boolean;
+}
+
+// What the club that owns the survey gets.
+export interface ClubSurvey extends SurveyBase {
+  responseCount: number;
+}
+
+
+export interface BaseEvent {
     id: string;
     title: string;
     club: Club;
     startsAt: string;        
     endsAt: string;          
     location?: string;        
-    survey?: EventSurvey;  
-    subtitle ?: string;
     description ?: string; 
+}
+
+export interface ClubEvent extends BaseEvent {
+  survey?: EventSurvey;
+}
+
+export interface ClubManagedEvent extends BaseEvent{
+  survey?: ClubSurvey;
 }
 
 export type EventStatus = 'live' | 'upcoming' | 'past';
 
+
+export type SurveyQuestionResult =
+    | { questionId: string; text: string; type: "text"; answeredCount: number; answers: string[] }
+    | { questionId: string; text: string; type: "single_choice" | "multiple_choice"; answeredCount: number;
+        options: { label: string; count: number }[] };
+
+export interface SurveyResults {
+    id: string;
+    title: string;
+    status: SurveyStatusType;
+    responseCount: number;
+    questions: SurveyQuestionResult[];
+}
+
+
 // Worked out on the device from the timestamps
-export function getEventStatus(event: ClubEvent, now: Date = new Date()): EventStatus {
+export function getEventStatus(event: BaseEvent, now: Date = new Date()): EventStatus {
   if (now < new Date(event.startsAt)) return 'upcoming';
   if (now > new Date(event.endsAt)) return 'past';
   return 'live';
 }
 
-export function isSurveyAvailable(event: ClubEvent, now: Date = new Date()): boolean {
-  return !!event.survey && 
-        !event.survey.completed && 
-        (!event.survey.closesAt || now < new Date(event.survey.closesAt)) && 
-        event.survey.status === 'open';
+export function isSurveyAvailable(event: ClubEvent|ClubManagedEvent): boolean {
+    if (!event.survey)
+        return false;
+
+    if ("completed" in event.survey)
+        return !event.survey.completed && event.survey.status === 'open';
+
+    return event.survey.status === 'open';
 }
 
 export function formatDate(iso: string) {

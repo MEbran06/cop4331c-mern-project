@@ -77,7 +77,6 @@ export default function EventDetailsPage() {
                         date={formatLongDate(event.startsAt)}
                         time={formatTimeRange(event.startsAt, event.endsAt)}
                         location={event.location ?? 'To be announced'}
-                        subtitle={event.subtitle}
                     />  
                     {isSurveyAvailable(event) &&
                     <View style={style.surveyContainer}>
@@ -139,7 +138,6 @@ function EventSummary({
     date,
     time,
     location,
-    subtitle
 }: EventSummaryProps) {
     const { theme } = useTheme();
     const style = useMemo(() => styleGen(theme), [theme]);
@@ -152,7 +150,6 @@ function EventSummary({
                     </View>
                     <Text style={style.presents}>{clubName} presents</Text>
                     <Text style={style.title}>{title}</Text>
-                    {!!subtitle && <Text style={style.subtitle}>{subtitle}</Text>}
                 </View>
                 <View style={style.summaryDateTimeWrapper}>
                     <View style={[style.infoCell, style.infoCellHalf, style.infoCellDivider]}>
@@ -253,11 +250,6 @@ const styleGen = (theme: Theme) => StyleSheet.create({
         textTransform: 'uppercase',
         color: theme.onHi,
         includeFontPadding: false
-    },
-    subtitle: {
-        fontFamily: fonts.bodySemi,
-        fontSize: 15,
-        color: theme.onHi
     },
     // DATE | TIME row
     summaryDateTimeWrapper: {
