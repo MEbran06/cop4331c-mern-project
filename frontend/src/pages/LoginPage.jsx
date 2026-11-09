@@ -76,7 +76,7 @@ export default function LoginPage() {
 
 const styles = {
   container: {
-    backgroundColor: '#F3F3F3',
+    backgroundColor: '#D1D1D1',
     minHeight: '100vh',
     display: 'flex',
     justifyContent: 'center',

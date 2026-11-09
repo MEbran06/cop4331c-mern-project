@@ -34,7 +34,7 @@ export default function DashboardPage() {
         <div style={styles.adminPanel}>
           <h2 style={styles.adminTitle}>CLUB MANAGEMENT</h2>
           <p style={{ margin: '0 0 1rem 0' }}>You have permission to create and manage events.</p>
-          <button className="brutalist-button" style={{ backgroundColor: '#FFFFFF' }}>
+          <button className="brutalist-button" style={{ backgroundColor:'#FFFFFF',color:'#000000' }}>
             + CREATE NEW EVENT
           </button>
         </div>
@@ -75,6 +75,7 @@ export default function DashboardPage() {
 
 const styles = {
   container: {
+    backgroundColor:'#D1D1D1',
     minHeight:'100vh',
     fontFamily:'-apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif',
     padding:'2rem 1rem',
@@ -105,6 +106,7 @@ const styles = {
     padding:'0.5rem 1rem',
     fontSize:'0.85rem',
     marginTop:'0',
+    backgroundColor:'#000000',
     backgroundColor:'#FFFFFF',
   },
   adminPanel: {
