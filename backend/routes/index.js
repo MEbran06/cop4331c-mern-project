@@ -11,4 +11,9 @@ router.get('/ping', (req, res) => {
 router.use('/auth', require('./auth'));
 router.use('/users', require('./users'));
 
+// Event CRUD and the club event lists required by the mobile frontend.
+const eventsRouter = require('./events');
+router.use('/events', eventsRouter);
+router.use('/clubs', eventsRouter.clubEventsRouter);
+
 module.exports = router;
