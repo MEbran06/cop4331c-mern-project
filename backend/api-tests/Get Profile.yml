@@ -1,0 +1,39 @@
+meta:
+  name: Get Profile
+  type: http
+  seq: 8
+
+http:
+  method: GET
+  url: "{{baseURL}}/api/users/profile"
+  auth:
+    type: bearer
+    token: "{{token}}"
+
+runtime:
+  scripts:
+    - type: tests
+      code: |-
+        const body = res.getBody();
+
+        test("responds 200 OK", function () {
+          expect(res.getStatus()).to.equal(200);
+        });
+
+        test("returns user profile with role and user info", function () {
+          expect(body).to.have.property("role");
+          expect(body).to.have.property("user");
+        });
+
+        test("never returns the password hash", function () {
+          expect(body.user).to.not.have.property("passwordHash");
+        });
+
+settings:
+  encodeUrl: true
+  timeout: 0
+  followRedirects: true
+  maxRedirects: 5
+
+docs: |-
+  Protected profile route returning role-specific user details.

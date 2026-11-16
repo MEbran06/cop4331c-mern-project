@@ -1,0 +1,36 @@
+meta:
+  name: Follow Club
+  type: http
+  seq: 10
+
+http:
+  method: POST
+  url: "{{baseURL}}/api/clubs/{{clubId}}/follow"
+  auth:
+    type: bearer
+    token: "{{token}}"
+
+runtime:
+  scripts:
+    - type: tests
+      code: |-
+        const body = res.getBody();
+
+        test("responds 200 OK", function () {
+          expect(res.getStatus()).to.equal(200);
+        });
+
+        test("toggles follow status and returns follower count", function () {
+          expect(body).to.have.property("clubId");
+          expect(body).to.have.property("isFollowing");
+          expect(body).to.have.property("followerCount");
+        });
+
+settings:
+  encodeUrl: true
+  timeout: 0
+  followRedirects: true
+  maxRedirects: 5
+
+docs: |-
+  Toggle follow or unfollow status for a specific club.
