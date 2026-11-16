@@ -1,0 +1,12 @@
+meta:
+  name: Search Clubs
+  type: http
+  seq: 7
+
+get:
+  url: {{baseUrl}}/api/clubs?q=&followedOnly=false
+  body: none
+  auth: bearer
+
+auth:bearer:
+  token: {{token}}
