@@ -12,7 +12,6 @@
     "seed": "node seed.js",
     "test": "npx concurrently -k -s first \"npm start\" \"npx @usebruno/cli run api-tests --env local\""
   },
-  },
   "dependencies": {
     "bcryptjs": "^3.0.3",
     "cors": "^2.8.6",
