@@ -67,7 +67,7 @@ exports.getUser = async (req, res, next) => {
   }
 };
 
-// GET /api/users/profile (or /api/profile depending on your route mapping)
+// GET /api/users/profile — Fetch current logged-in user's profile and details
 exports.getProfile = async (req, res, next) => {
   try {
     const found = await findAccountById(req.userId);
