@@ -13,7 +13,7 @@ router.param('userId', validateObjectId);
 router.post('/', users.createUser);
 
 // Everything below needs a logged-in user, and only their own account
-// GET /api/users/profile - Must precede /:userId
-router.get('/profile', requireAuth, users.getProfile);
+// GET /api/users/:userId - Fetch one user
+router.get('/:userId', requireAuth, requireSelf, users.getUser);
 
 module.exports = router;

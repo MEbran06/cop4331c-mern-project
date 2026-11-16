@@ -8,10 +8,4 @@ const router = express.Router();
 // deliberate, conventional exception to noun-only REST URLs.
 router.post('/login', auth.login);
 
-// POST /api/auth/forgot-password
-router.post('/forgot-password', auth.forgotPassword);
-
-// POST /api/auth/reset-password
-router.post('/reset-password', auth.resetPassword);
-
 module.exports = router;

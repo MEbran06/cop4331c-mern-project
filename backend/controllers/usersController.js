@@ -1,7 +1,7 @@
 const bcrypt = require('bcryptjs');
 const { createToken } = require('../middleware/auth');
 const { MODELS, ROLES, findAccountByEmail, findAccountById, toPublicUser } = require('../utils/accounts');
-const { Membership, Event } = require('../db_schema');
+
 // How much work bcrypt does per hash. Each +1 doubles the time it takes,
 // which is what makes stolen hashes slow to crack. 10 is a common default.
 const SALT_ROUNDS = 10;
@@ -62,53 +62,6 @@ exports.getUser = async (req, res, next) => {
     }
 
     res.status(200).json(toPublicUser(found.account, found.role));
-  } catch (err) {
-    next(err);
-  }
-};
-
-// GET /api/users/profile — Fetch current logged-in user's profile and details
-exports.getProfile = async (req, res, next) => {
-  try {
-    const found = await findAccountById(req.userId);
-    if (!found) {
-      return res.status(404).json({ error: 'User not found' });
-    }
-
-    const publicUser = toPublicUser(found.account, found.role);
-
-    if (found.role === 'student') {
-      const followedClubs = await Membership.find({ student: req.userId })
-        .populate('club', 'name description email')
-        .sort({ joinedAt: -1 })
-        .lean();
-
-      return res.status(200).json({
-        role: 'student',
-        user: publicUser,
-        followingCount: followedClubs.length,
-        following: followedClubs.map((m) => ({
-          ...m.club,
-          joinedAt: m.joinedAt
-        }))
-      });
-    }
-
-    if (found.role === 'club') {
-      const [followerCount, eventCount] = await Promise.all([
-        Membership.countDocuments({ club: req.userId }),
-        Event.countDocuments({ club: req.userId })
-      ]);
-
-      return res.status(200).json({
-        role: 'club',
-        user: publicUser,
-        followerCount,
-        eventCount
-      });
-    }
-
-    res.status(400).json({ error: 'Invalid account role' });
   } catch (err) {
     next(err);
   }
