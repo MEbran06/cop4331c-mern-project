@@ -1,12 +1,11 @@
 const { Club, Membership } = require('../db_schema');
 
-// GET /api/clubs — Search & browse clubs
+// GET /api/clubs — Search & browse clubs (query params: ?q=name&followedOnly=true/false)
 exports.searchClubs = async (req, res, next) => {
   try {
     const { q = '', followedOnly = 'false' } = req.query;
     const query = {};
 
-    // Match name or description using case-insensitive regex
     if (typeof q === 'string' && q.trim()) {
       const regex = new RegExp(q.trim(), 'i');
       query.$or = [{ name: regex }, { description: regex }];
@@ -24,7 +23,7 @@ exports.searchClubs = async (req, res, next) => {
 
     const clubs = await Club.find(query).select('-passwordHash').sort({ name: 1 }).lean();
 
-    // Compute follower counts
+    // Attach follower counts
     const clubIds = clubs.map((c) => c._id);
     const counts = await Membership.aggregate([
       { $match: { club: { $in: clubIds } } },
