@@ -7,7 +7,7 @@ exports.searchClubs = async (req, res, next) => {
     const query = {};
 
     if (typeof q === 'string' && q.trim()) {
-      const regex = new RegExp(q.trim(), 'i');
+      const regex = new RegExp(RegExp.escape(q.trim()), 'i');
       query.$or = [{ name: regex }, { description: regex }];
     }
 
