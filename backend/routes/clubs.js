@@ -1,5 +1,5 @@
 const express = require('express');
-const clubs = require('../controllers/clubsController');
+const clubs = require('../controllers/clubController');
 const { requireAuth } = require('../middleware/auth');
 const validateObjectId = require('../middleware/validateObjectId');
 
