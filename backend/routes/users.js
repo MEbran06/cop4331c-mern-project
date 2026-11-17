@@ -16,4 +16,7 @@ router.post('/', users.createUser);
 // GET /api/users/profile - Must precede /:userId
 router.get('/profile', requireAuth, users.getProfile);
 
+// GET /api/users/:userId - Fetch one user (only your own account)
+router.get('/:userId', requireAuth, requireSelf, users.getUser);
+
 module.exports = router;
