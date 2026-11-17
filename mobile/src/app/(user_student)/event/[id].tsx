@@ -1,7 +1,7 @@
 import { PageContainer } from "@/components/PageContainer";
-import { StyleSheet, Text, View, Share, Pressable } from "react-native";
-import { ImperativeRouter, useLocalSearchParams, useRouter } from 'expo-router';
-import { ClubEvent, estimateSurveyMinutes, formatLongDate, formatTimeRange, getEventFromId, isSurveyAvailable } from "@/utils/events";
+import { StyleSheet, Text, View, Share, Pressable, ActivityIndicator } from "react-native";
+import { ImperativeRouter, useFocusEffect, useLocalSearchParams, useRouter } from 'expo-router';
+import { ClubEvent, estimateSurveyMinutes, formatLongDate, formatTimeRange, isSurveyAvailable } from "@/utils/events";
 import { DotGrid, HardShadow } from "@/components/decor";
 import { ButtonHeader } from "@/components/ButtonHeader";
 import { useTheme } from "@/contexts/theme";
@@ -11,9 +11,11 @@ import { ScrollableSection } from "@/components/ScrollableSection";
 import { ThemedDisplayTitle } from "@/components/ThemedInputs";
 import { ArrowButton } from "@/components/ThemedButton";
 import { ThemedBox } from "@/components/ThemedBox";
-import { useState, useMemo } from "react";
+import { useState, useMemo, useCallback } from "react";
 import { ClubRow } from "@/components/clubRow";
 import { handleSingleToggleFollow } from "@/utils/utils";
+import { getEvent } from "@/utils/api";
+import { useApi } from "@/hooks/useApi";
 
 async function handleShared(event: ClubEvent | undefined) {
 
@@ -36,14 +38,40 @@ export default function EventDetailsPage() {
     const { theme } = useTheme();
     const style = useMemo(() => styleGen(theme), [theme]);
     const { id } = useLocalSearchParams<{ id: string; }>();
-    const event = getEventFromId(id);
+    const [event, setEvent] = useState<ClubEvent>();
+    const [error, setError] = useState<string>();
+    const [isLoading, setIsLoading] = useState(true);
     const router = useRouter();
-    const [isFollowing, setIsFollowing] = useState(event?.club.isFollowing ?? false);
+    const [isFollowing, setIsFollowing] = useState(false);
+    const api = useApi();
+    
+    useFocusEffect(useCallback(()=>{
+        let active = true;
+
+        getEvent(id, api).then((event) => {
+            if (!active) return;
+            setEvent(event);
+            setIsFollowing(event.club.isFollowing);
+            setError(undefined);
+        }).catch((error)=>{if (active) setError(error.message)})
+            .finally(()=>{if (active) setIsLoading(false)});
+
+        return ()=>{active=false}
+    },[id, api]));
+
 
     // Opened from a shared link there's no screen to go back to, so go to the feed instead
     const goBack = () => router.canGoBack() ? router.back() : router.replace('/');
 
-    if (!event) {
+    if (isLoading) {
+        return (
+            <PageContainer>
+                <ActivityIndicator style={{ marginTop: 40 }} color={theme.ink}/>
+            </PageContainer>
+        );
+    }
+
+    if (!event || !!error) {
         return (
             <PageContainer>
                 <ButtonHeader onAction={goBack} theme={theme} buttonType="arrow-left"/>
@@ -115,7 +143,7 @@ export default function EventDetailsPage() {
                             theme={theme} clubInfo={event.club} 
                             isFollowing={isFollowing} 
                             onFollowButtonPress={
-                                ()=>handleSingleToggleFollow(event.club, setIsFollowing, isFollowing)}
+                                ()=>handleSingleToggleFollow(event.club, api, setIsFollowing, isFollowing)}
                             />
                     </View>
             </ScrollableSection>

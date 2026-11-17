@@ -16,6 +16,7 @@ import { CornerSquares, DotGrid } from '@/components/decor';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { handleSingleToggleFollow } from '@/utils/utils';
 import { EventSection } from '@/components/EventSection';
+import { useApi } from '@/hooks/useApi';
 
 const SECTIONS = [
     { title: 'Happening now', status: 'live',     sort: 'asc'  },
@@ -43,6 +44,7 @@ export default function FollowingPage() {
     const [isFollowing, SetIsFollowing] = useState<boolean>();
     const [loading, setLoading] = useState(true);
     const insets = useSafeAreaInsets();
+    const api = useApi();
 
     const goBack = () => router.canGoBack() ? router.back() : router.replace('/');
     
@@ -130,7 +132,7 @@ export default function FollowingPage() {
                             {club.description}
                         </Text>}
                         <View style={style.followButton}>
-                            <FollowButton onPress={()=>handleSingleToggleFollow(club, SetIsFollowing, isFollowing??false)} isFollowing={isFollowing??false} theme={theme}/>
+                            <FollowButton onPress={()=>handleSingleToggleFollow(club, api, SetIsFollowing, isFollowing??false)} isFollowing={isFollowing??false} theme={theme}/>
                         </View>
                         {!!events && SECTIONS.map((section) => (
                             <EventSection key={section.status}

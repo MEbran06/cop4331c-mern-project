@@ -4,13 +4,14 @@ import { PageContainer } from '@/components/PageContainer';
 import { ScrollableSection } from '@/components/ScrollableSection';
 import { ThemedDisplayTitle, ThemedInputContainer, ThemedSearchInput } from '@/components/ThemedInputs';
 import { Club } from '@/utils/events';
-import { fetchFollowedClubs, searchClubs } from '@/utils/mockEvents';
 import { useFocusEffect, useRouter } from 'expo-router';
 import { useCallback, useEffect, useState, useMemo } from 'react';
 import { StyleSheet, Text, View } from 'react-native';
 import { DotGrid, HardShadow } from '@/components/decor';
 import { fonts, spacing, Theme } from '@/constants/theme';
 import { handleToggleFollow } from '@/utils/utils';
+import { getFollowedClubs, searchClubs } from '@/utils/api';
+import { useApi } from '@/hooks/useApi';
 
 export default function FollowingPage() {
     const { theme } = useTheme();
@@ -19,7 +20,9 @@ export default function FollowingPage() {
     const [followedClubs, setFollowedClubs] = useState<Club[]>([]);
     const [searchResults, setSearchResults] = useState<Club[]>([]);
     const [search, setSearch] = useState('');
+    const [error, setError] = useState<string>()
     const router = useRouter();
+    const api = useApi();
 
     const isSearching = !!search.trim();
     const visibleClubs = isSearching ? searchResults : followedClubs;
@@ -31,29 +34,34 @@ export default function FollowingPage() {
 
             // runs every time the tab comes into view, 
             // so unfollowed clubs are gone on the next visit
-            fetchFollowedClubs().then((clubs) => {
+            getFollowedClubs(api).then((clubs) => {
                 if (!active) return;
                 setFollowedClubs(clubs);
                 setFollowed(clubs.map(club => club.id));
-            });
+                setError(undefined);
+            }).catch((error)=>{if (active) setError(error.message)});
 
             return () => { active = false; setSearch('')};
-        }, [])
+        }, [api])
     );
 
     useEffect(()=>{
 
         let active = true; 
 
-            // do the search
-            searchClubs(search).then((clubs) => {
-                if (!active) return;
-                setSearchResults(clubs);
-            });
-
+        if (search.trim() === '')
             return () => { active = false; };
 
-    }, [search]);
+        // do the search
+        const timer = setTimeout(() => 
+            searchClubs(search, api).then((clubs) => {
+                if (!active) return;
+                setSearchResults(clubs);
+            }).catch((error)=>{if (active) setError(error.message)}), 250);
+
+        return () => { active = false; clearTimeout(timer);};
+
+    }, [search, api]);
 
   return (
     <PageContainer>
@@ -72,14 +80,19 @@ export default function FollowingPage() {
         </ThemedInputContainer>
         <ScrollableSection>
             <Text style={style.sectionLabel}>{label}</Text>
-            {visibleClubs.length > 0 ? (
+            {!!error ? 
+                <Text style={style.emptyText}>
+                    {error}
+                </Text>
+            :
+                visibleClubs.length > 0 ? (
                 // one box for the whole list; rows drop their own border and use a line between them
                 <HardShadow color={theme.ink} style={style.listShadow}>
                     <View style={style.list}>
                         {visibleClubs.map((club, index) => (
                             <ClubRow key={club.id} theme={theme} clubInfo={club}
                                 isFollowing={followed.includes(club.id)}
-                                onFollowButtonPress={()=>handleToggleFollow(club, followed, setFollowed)}
+                                onFollowButtonPress={()=>handleToggleFollow(club, followed, setFollowed, api)}
                                 style={[style.row, index > 0 && style.rowDivider]}
                                 onBoxPress={()=>router.push({
                                     pathname: '/(user_student)/(tabs)/following/club/[id]',

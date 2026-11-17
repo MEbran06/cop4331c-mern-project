@@ -1,10 +1,12 @@
 import { Dispatch, SetStateAction } from "react";
 import { Club } from "./events";
-import { setClubFollowing } from "./mockEvents";
+import { ApiRequest } from "@events/api";
+import { toggleFollow } from "./api";
 
 
 export async function handleToggleFollow(club: Club, followed: string[],
-        setFollowed: Dispatch<SetStateAction<string[]>>) {
+        setFollowed: Dispatch<SetStateAction<string[]>>,
+        api: ApiRequest) {
     const follow = !followed.includes(club.id);
 
     // update the button right away
@@ -13,7 +15,12 @@ export async function handleToggleFollow(club: Club, followed: string[],
     );
 
     try {
-        await setClubFollowing(club.id, follow);
+        const isFollowing = await toggleFollow(club.id, api);
+        setFollowed((prevItems) => {
+            const without = prevItems.filter((clubId) => clubId !== club.id);
+            return isFollowing ? [...without, club.id] : without;
+        });
+
     } catch {
         // the request failed: put the button back the way it was
         setFollowed((prevItems: string[]) =>
@@ -22,11 +29,12 @@ export async function handleToggleFollow(club: Club, followed: string[],
     }
 }
 
-export async function handleSingleToggleFollow(club: Club,setter: (val: boolean)=>void, isFollowing: boolean) {
+export async function handleSingleToggleFollow(club: Club, api: ApiRequest, setter: (val: boolean)=>void, isFollowing: boolean) {
     setter(!isFollowing);
 
      try {
-        await setClubFollowing(club.id, !isFollowing);
+        const follow = await toggleFollow(club.id, api);
+        setter(follow);
     } catch {
         // the request failed: put the button back the way it was
         setter(isFollowing);
