@@ -42,6 +42,19 @@ jobs:
     needs: changes
     if: needs.changes.outputs.backend == 'true'
     runs-on: ubuntu-latest
+    # A throwaway MongoDB that only exists while this job runs, so the
+    # API tests never touch the real database
+    services:
+      mongo:
+        image: mongo:7
+        ports:
+          - 27017:27017
+    # What backend/.env provides on your computer. .env isn't in Git, so the
+    # server needs these here. The secret only signs tokens for test accounts
+    # that are thrown away with the database, so it doesn't need to be a real one.
+    env:
+      MONGODB_URI: mongodb://localhost:27017/clubevents-ci
+      JWT_SECRET: ci-only-secret
     steps:
       - uses: actions/checkout@v4
       - uses: actions/setup-node@v4

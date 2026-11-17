@@ -1,0 +1,56 @@
+info:
+  name: Register Club
+  type: http
+  seq: 3
+
+http:
+  method: POST
+  url: "{{baseURL}}/api/users"
+  body:
+    type: json
+    data: |-
+      {
+        "role": "club",
+        "name": "{{clubName}}",
+        "email": "{{clubEmail}}",
+        "password": "{{password}}",
+        "description": "A club made by the API tests."
+      }
+  auth: inherit
+
+runtime:
+  scripts:
+    - type: before-request
+      code: |-
+        // A new club every run, so the follow tests start from 0 followers
+        const stamp = Date.now();
+        bru.setVar("clubEmail", `club-${stamp}@example.com`);
+        bru.setVar("clubName", `Test Club ${stamp}`);
+    - type: after-response
+      code: |-
+        // Only the club's id is kept; {{token}} stays the student's
+        if (res.getStatus() === 201) {
+          bru.setVar("clubId", res.getBody().user.id);
+        }
+    - type: tests
+      code: |-
+        const body = res.getBody();
+
+        test("responds 201 Created", function () {
+          expect(res.getStatus()).to.equal(201);
+        });
+
+        test("returns the new club with its description", function () {
+          expect(body.user.role).to.equal("club");
+          expect(body.user.name).to.equal(bru.getVar("clubName"));
+          expect(body.user.description).to.equal("A club made by the API tests.");
+        });
+
+settings:
+  encodeUrl: true
+  timeout: 0
+  followRedirects: true
+  maxRedirects: 5
+
+docs: |-
+  Creates a club for the search and follow tests and saves {{clubId}}.
