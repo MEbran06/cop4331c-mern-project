@@ -1,7 +1,7 @@
-meta:
+info:
   name: Follow Club
   type: http
-  seq: 10
+  seq: 9
 
 http:
   method: POST
@@ -20,10 +20,10 @@ runtime:
           expect(res.getStatus()).to.equal(200);
         });
 
-        test("toggles follow status and returns follower count", function () {
-          expect(body).to.have.property("clubId");
-          expect(body).to.have.property("isFollowing");
-          expect(body).to.have.property("followerCount");
+        test("the student now follows the club", function () {
+          expect(body.clubId).to.equal(bru.getVar("clubId"));
+          expect(body.isFollowing).to.equal(true);
+          expect(body.followerCount).to.equal(1);
         });
 
 settings:
@@ -33,4 +33,4 @@ settings:
   maxRedirects: 5
 
 docs: |-
-  Toggle follow or unfollow status for a specific club.
+  The follow route toggles: the first call follows the club.

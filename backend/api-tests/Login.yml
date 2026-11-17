@@ -1,7 +1,7 @@
 info:
   name: Login
   type: http
-  seq: 3
+  seq: 4
 
 http:
   method: POST
@@ -10,7 +10,7 @@ http:
     type: json
     data: |-
       {
-        "login": "{{login}}",
+        "email": "{{studentEmail}}",
         "password": "{{password}}"
       }
   auth: inherit
@@ -19,10 +19,9 @@ runtime:
   scripts:
     - type: after-response
       code: |-
-        // Save the token and user id for every request that follows
+        // Replace the token from sign-up with the one from logging in
         if (res.getStatus() === 200) {
           bru.setVar("token", res.getBody().token);
-          bru.setVar("userId", res.getBody().user._id);
         }
     - type: tests
       code: |-
@@ -36,12 +35,14 @@ runtime:
           expect(body.token).to.be.a("string").and.not.be.empty;
         });
 
-        test("returns the user that logged in", function () {
-          expect(body.user.login).to.equal(bru.getEnvVar("login"));
+        test("returns the student who logged in", function () {
+          expect(body.user.id).to.equal(bru.getVar("userId"));
+          expect(body.user.email).to.equal(bru.getVar("studentEmail"));
         });
 
-        test("never returns the password", function () {
+        test("never returns the password or its hash", function () {
           expect(body.user).to.not.have.property("password");
+          expect(body.user).to.not.have.property("passwordHash");
         });
 
 settings:
@@ -51,4 +52,4 @@ settings:
   maxRedirects: 5
 
 docs: |-
-  Logs in as the user in the environment and saves {{token}} and {{userId}} for later requests.
+  Logs in as the student from Register Student and saves {{token}}.

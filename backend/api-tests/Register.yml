@@ -1,5 +1,5 @@
 info:
-  name: Register
+  name: Register Student
   type: http
   seq: 2
 
@@ -10,11 +10,10 @@ http:
     type: json
     data: |-
       {
-        "firstName": "Test",
-        "lastName": "Student",
-        "login": "{{newLogin}}",
-        "password": "{{newPassword}}",
-        "email": "student@example.com"
+        "role": "student",
+        "name": "Test Student",
+        "email": "{{studentEmail}}",
+        "password": "{{password}}"
       }
   auth: inherit
 
@@ -22,9 +21,15 @@ runtime:
   scripts:
     - type: before-request
       code: |-
-        // Registering the same login twice returns 409, so make each run unique
-        bru.setVar("newLogin", `student${Date.now()}`);
-        bru.setVar("newPassword", "Passw0rd!");
+        // The same email can't register twice (409), so each run uses a new one
+        bru.setVar("studentEmail", `student-${Date.now()}@example.com`);
+    - type: after-response
+      code: |-
+        // The student's token and id are used by the requests that follow
+        if (res.getStatus() === 201) {
+          bru.setVar("token", res.getBody().token);
+          bru.setVar("userId", res.getBody().user.id);
+        }
     - type: tests
       code: |-
         const body = res.getBody();
@@ -33,17 +38,16 @@ runtime:
           expect(res.getStatus()).to.equal(201);
         });
 
-        test("returns a token and the new user", function () {
-          expect(body.token).to.be.a("string");
-          expect(body.user.login).to.equal(bru.getVar("newLogin"));
+        test("returns a token and the new student", function () {
+          expect(body.token).to.be.a("string").and.not.be.empty;
+          expect(body.user.id).to.be.a("string");
+          expect(body.user.email).to.equal(bru.getVar("studentEmail"));
+          expect(body.user.role).to.equal("student");
         });
 
-        test("never returns the password", function () {
+        test("never returns the password or its hash", function () {
           expect(body.user).to.not.have.property("password");
-        });
-
-        test("ignores any role sent by the client", function () {
-          expect(body.user.role).to.equal("user");
+          expect(body.user).to.not.have.property("passwordHash");
         });
 
 settings:
@@ -53,4 +57,4 @@ settings:
   maxRedirects: 5
 
 docs: |-
-  Creates a new account. Does not change the logged-in user for the requests that follow.
+  Creates a new student account and saves {{token}} and {{userId}} for later requests.

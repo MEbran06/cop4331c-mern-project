@@ -1,4 +1,5 @@
 const bcrypt = require('bcryptjs');
+const crypto = require('crypto');
 const { createToken } = require('../middleware/auth');
 const { findAccountByEmail, toPublicUser } = require('../utils/accounts');
 

@@ -1,11 +1,11 @@
-meta:
+info:
   name: Search Clubs
   type: http
-  seq: 9
+  seq: 8
 
 http:
   method: GET
-  url: "{{baseURL}}/api/clubs?q=&followedOnly=false"
+  url: "{{baseURL}}/api/clubs?q={{clubName}}"
   auth:
     type: bearer
     token: "{{token}}"
@@ -15,14 +15,25 @@ runtime:
     - type: tests
       code: |-
         const body = res.getBody();
+        const club = (body.clubs || []).find((c) => c._id === bru.getVar("clubId"));
 
         test("responds 200 OK", function () {
           expect(res.getStatus()).to.equal(200);
         });
 
-        test("returns an array of clubs", function () {
-          expect(body).to.have.property("clubs");
+        test("finds the club from Register Club by name", function () {
           expect(body.clubs).to.be.an("array");
+          expect(club, "club in results").to.exist;
+          expect(club.name).to.equal(bru.getVar("clubName"));
+        });
+
+        test("shows 0 followers and not followed yet", function () {
+          expect(club.followerCount).to.equal(0);
+          expect(club.isFollowing).to.equal(false);
+        });
+
+        test("never returns password hashes", function () {
+          body.clubs.forEach((c) => expect(c).to.not.have.property("passwordHash"));
         });
 
 settings:
@@ -32,4 +43,4 @@ settings:
   maxRedirects: 5
 
 docs: |-
-  Search and browse clubs with optional query parameter and follow status.
+  Searches clubs by the name of the club made in Register Club.

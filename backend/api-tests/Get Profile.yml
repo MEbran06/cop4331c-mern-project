@@ -1,7 +1,7 @@
-meta:
+info:
   name: Get Profile
   type: http
-  seq: 8
+  seq: 7
 
 http:
   method: GET
@@ -20,9 +20,15 @@ runtime:
           expect(res.getStatus()).to.equal(200);
         });
 
-        test("returns user profile with role and user info", function () {
-          expect(body).to.have.property("role");
-          expect(body).to.have.property("user");
+        test("returns the logged-in student", function () {
+          expect(body.role).to.equal("student");
+          expect(body.user.id).to.equal(bru.getVar("userId"));
+          expect(body.user.email).to.equal(bru.getVar("studentEmail"));
+        });
+
+        test("a new student follows no clubs yet", function () {
+          expect(body.followingCount).to.equal(0);
+          expect(body.following).to.be.an("array").that.is.empty;
         });
 
         test("never returns the password hash", function () {

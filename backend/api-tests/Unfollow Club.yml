@@ -1,0 +1,35 @@
+info:
+  name: Unfollow Club
+  type: http
+  seq: 10
+
+http:
+  method: POST
+  url: "{{baseURL}}/api/clubs/{{clubId}}/follow"
+  auth:
+    type: bearer
+    token: "{{token}}"
+
+runtime:
+  scripts:
+    - type: tests
+      code: |-
+        const body = res.getBody();
+
+        test("responds 200 OK", function () {
+          expect(res.getStatus()).to.equal(200);
+        });
+
+        test("calling follow again unfollows the club", function () {
+          expect(body.isFollowing).to.equal(false);
+          expect(body.followerCount).to.equal(0);
+        });
+
+settings:
+  encodeUrl: true
+  timeout: 0
+  followRedirects: true
+  maxRedirects: 5
+
+docs: |-
+  The same route as Follow Club. The second call unfollows.
