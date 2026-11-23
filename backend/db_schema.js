@@ -106,7 +106,7 @@ const surveySchema = new Schema(
       },
     },
   },
-  { timestamps: true }
+  { timestamps: true, optimisticConcurrency: true }
 );
 
 const surveyAnswerSchema = new mongoose.Schema(
@@ -139,10 +139,6 @@ const surveyResponseSchema = new mongoose.Schema(
         answers: {
             type: [surveyAnswerSchema],
             required: true,
-            validate: {
-                validator: (answers) => answers.length > 0,
-                message: "A response must contain at least one answer.",
-            },
         },
     },
     { timestamps: true }

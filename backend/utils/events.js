@@ -1,29 +1,20 @@
-const { Club, Membership, Survey, SurveyResponse } = require('../db_schema');
+const { Survey } = require('../db_schema');
+const { getClubSummary } = require('./clubs');
+const { toSurveyResponse } = require('./surveys');
 
 // Explicit response objects keep MongoDB internals and password hashes out of
 // the API. Do not send populated model documents directly to the frontend.
 async function toEventResponse(event, viewer, managed = false) {
-  const club = await Club.findById(event.club).select('name description').lean();
-  if (!club) throw new Error('Event references a missing club');
-
-  const [followers, following, survey] = await Promise.all([
-    Membership.countDocuments({ club: club._id }),
-    viewer.role === 'student'
-      ? Membership.exists({ club: club._id, student: viewer.id })
-      : Promise.resolve(null),
+  const [club, survey] = await Promise.all([
+    getClubSummary(event.club, viewer),
     Survey.findOne({ event: event._id }).lean()
   ]);
+  if (!club) throw new Error('Event references a missing club');
 
   const result = {
     id: String(event._id),
     title: event.title,
-    club: {
-      id: String(club._id),
-      name: club.name,
-      followers,
-      isFollowing: Boolean(following),
-      description: club.description || ''
-    },
+    club,
     startsAt: new Date(event.startsAt).toISOString(),
     endsAt: new Date(event.endsAt).toISOString(),
     location: event.location || '',
@@ -33,25 +24,7 @@ async function toEventResponse(event, viewer, managed = false) {
   // Public event routes hide draft surveys, even from club accounts. Only an
   // ownership-checked management route may request the managed response shape.
   if (survey && (managed || survey.status !== 'draft')) {
-    result.survey = {
-      id: String(survey._id),
-      title: survey.title || '',
-      status: survey.status,
-      questions: survey.questions.map(question => ({
-        id: String(question._id),
-        text: question.text || '',
-        type: question.type,
-        options: question.options || [],
-        required: Boolean(question.required)
-      }))
-    };
-    if (managed) {
-      result.survey.responseCount = await SurveyResponse.countDocuments({ survey: survey._id });
-    } else {
-      result.survey.completed = viewer.role === 'student' && Boolean(
-        await SurveyResponse.exists({ survey: survey._id, student: viewer.id })
-      );
-    }
+    result.survey = await toSurveyResponse(survey, viewer, managed);
   }
   return result;
 }

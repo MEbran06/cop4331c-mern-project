@@ -19,6 +19,10 @@ exports.errorHandler = (err, req, res, next) => {
     return res.status(400).json({ error: err.message });
   }
 
+  if (err.name === 'VersionError' || err.name === 'DocumentNotFoundError') {
+    return res.status(409).json({ error: 'Resource changed during the request' });
+  }
+
   // Unique index violation (e.g. two simultaneous registrations)
   if (err.code === 11000) {
     return res.status(409).json({ error: 'Resource already exists' });

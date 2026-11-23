@@ -10,6 +10,7 @@ router.param('clubId', validateObjectId);
 
 // GET /api/clubs - Search and browse clubs
 router.get('/', clubs.searchClubs);
+router.get('/:clubId', clubs.getClub);
 
 // POST /api/clubs/:clubId/follow - Toggle follow/unfollow status for a club
 router.post('/:clubId/follow', clubs.toggleFollowClub);

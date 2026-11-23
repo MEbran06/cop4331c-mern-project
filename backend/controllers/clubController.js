@@ -1,4 +1,11 @@
 const { Club, Membership } = require('../db_schema');
+const { getClubSummary } = require('../utils/clubs');
+
+exports.getClub = async (req, res) => {
+  const club = await getClubSummary(req.params.clubId, { id: req.userId, role: req.userRole });
+  if (!club) return res.status(404).json({ error: 'Club not found' });
+  res.json(club);
+};
 
 // GET /api/clubs — Search & browse clubs (query params: ?q=name&followedOnly=true/false)
 exports.searchClubs = async (req, res, next) => {

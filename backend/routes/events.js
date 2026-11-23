@@ -10,6 +10,7 @@ router.param('eventId', validateObjectId);
 // Static paths must precede /:eventId so "feed" is not treated as an ID.
 router.get('/feed', events.getFeed);
 router.post('/', events.createEvent);
+router.use('/:eventId/survey', require('./surveys'));
 router.get('/:eventId/manage', events.getManagedEvent);
 router.get('/:eventId', events.getEvent);
 router.patch('/:eventId', events.updateEvent);
