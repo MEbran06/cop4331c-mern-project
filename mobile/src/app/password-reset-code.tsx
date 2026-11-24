@@ -12,10 +12,9 @@ import { ScrollableSection } from '@/components/ScrollableSection';
 import { ArrowButton } from '@/components/ThemedButton';
 import { useState, useMemo } from 'react';
 
-function handleResetCode(code: string, router: ImperativeRouter) {
-    // todo: handle the submitted verification
-    const MOCK_RESET_TOKEN = 'mock_reset_token'
-    router.push({pathname:"/new-password", params:{resetToken: MOCK_RESET_TOKEN}});
+function handleResetCode(code: string, resetToken: string, router: ImperativeRouter) {
+    // TEMP: until verify-reset-code exists, pass the token straight through
+    router.push({pathname:"/new-password", params:{resetToken: resetToken}});
 }
 
 function handleResendCode() {
@@ -27,7 +26,7 @@ export default function PasswordReset() {
     const { theme } = useTheme();
     const styles = useMemo(() => stylesGen(theme), [theme]);
     const router = useRouter();
-    const { email } = useLocalSearchParams<{ email: string }>();
+    const { email, resetToken } = useLocalSearchParams<{ email: string, resetToken: string }>();
     const [code, setCode] = useState('');
     return (
         <PageContainer>
@@ -45,7 +44,7 @@ export default function PasswordReset() {
             </Text>
             <VerificationBox theme={theme} value={code} onChangeText={setCode} />
             <View style={{marginTop: spacing.gap}}>
-                <ArrowButton disabled={code.length < 6} theme={theme} label='continue' onPress={() => handleResetCode(code, router)}/>
+                <ArrowButton disabled={code.length < 6} theme={theme} label='continue' onPress={() => handleResetCode(code, resetToken, router)}/>
             </View>
             <View style={styles.helpBox}>
                 <Text style={styles.helpText}>

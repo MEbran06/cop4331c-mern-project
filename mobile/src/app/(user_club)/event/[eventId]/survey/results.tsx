@@ -8,7 +8,7 @@ import { fonts, spacing, Theme } from "@/constants/theme";
 import { useTheme } from "@/contexts/theme";
 import { useApi } from "@/hooks/useApi";
 import { SurveyResults } from "@/utils/events";
-import { getSurveyResults } from "@/utils/mockEvents";
+import { closeSurvey, getSurveyResults } from "@/utils/api";
 import { useFocusEffect, useLocalSearchParams, useRouter } from "expo-router";
 import { useCallback, useMemo, useState } from "react";
 import { ActivityIndicator, Alert, StyleSheet, Text, View } from "react-native";
@@ -44,8 +44,13 @@ export default function SurveyResultsPage() {
                 {
                     text: "Close survey",
                     style: "destructive",
-                    onPress: () => {
-                        // TODO: close the survey, then update results so the status changes
+                    onPress: async () => {
+                        try {
+                            const survey = await closeSurvey(eventId, api);
+                            setResults(prev=>prev&&{...prev, status:survey.status});
+                        } catch {
+                            Alert.alert("Could not close survey", "Check your connection and try again.");
+                        }
                     },
                 },
             ],

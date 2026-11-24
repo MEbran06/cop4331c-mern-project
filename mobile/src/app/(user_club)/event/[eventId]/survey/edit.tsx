@@ -1,19 +1,14 @@
 import { ButtonHeader } from "@/components/ButtonHeader";
 import { PageContainer } from "@/components/PageContainer";
-import { SurveyForm, SurveyFormResult } from "@/components/SurveyForm";
+import { SurveyForm } from "@/components/SurveyForm";
 import { fonts } from "@/constants/theme";
 import { useTheme } from "@/contexts/theme";
 import { useApi } from "@/hooks/useApi";
 import { ClubSurvey } from "@/utils/events";
-import { getClubManagedEvent } from "@/utils/mockEvents";
-import { ApiRequest } from "@events/api";
 import { useLocalSearchParams, useRouter } from "expo-router";
 import { useEffect, useState } from "react";
 import { ActivityIndicator, Text } from "react-native";
-
-async function updateSurvey(eventId: string, status: "draft" | "open", survey: SurveyFormResult, api: ApiRequest) {
-    // TODO: PATCH the existing survey with its status
-}
+import { updateSurvey, getClubManagedEvent } from "@/utils/api";
 
 export default function SurveyEdit() {
     const {theme} = useTheme();
@@ -50,8 +45,8 @@ export default function SurveyEdit() {
                     theme={theme}
                     heading="edit"
                     initialValues={{ title: survey.title, questions: survey.questions }}
-                    onSaveDraft={(updated) => updateSurvey(eventId, "draft", updated, api)}
-                    onPublish={(updated) => updateSurvey(eventId, "open", updated, api)}/>
+                    onSaveDraft={ async (updated) => {await updateSurvey(eventId, "draft", updated, api); router.back();}}
+                    onPublish={async (updated) => {await updateSurvey(eventId, "open", updated, api); router.back();}}/>
             )}
         </PageContainer>
     );

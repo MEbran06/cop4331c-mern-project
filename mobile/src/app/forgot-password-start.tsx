@@ -12,25 +12,31 @@ import { useState } from "react";
 import * as z from 'zod';
 import { ArrowButton } from "@/components/ThemedButton";
 import { useSession } from "@/contexts/ctx";
+import { ApiRequest } from "@events/api";
+import { requestPasswordReset } from "@/utils/api";
+import { useApi } from "@/hooks/useApi";
 
 const emailFormSchema = z.object({
     email: z.string().min(1, {message: 'Email is required'}).email({message: "Invalid email address"})
 });
 
-async function handleSubmit(data: {email: string}, setErrors: CallableFunction, router: ImperativeRouter): Promise<void>{
+async function handleSubmit(data: {email: string}, setErrors: CallableFunction, router: ImperativeRouter, api: ApiRequest): Promise<void>{
     const result = emailFormSchema.safeParse(data);
     if (!result.success) {
         const flat = result.error.flatten();
         setErrors(flat.fieldErrors);
         return;
     }
+    setErrors(undefined); // the email is valid now, so clear the old message
 
-    // todo: call backend
+    const {devResetToken} = await requestPasswordReset(data.email, api);
     router.push({ 
         pathname: '/password-reset-code', 
         params: { 
-            email: data.email
-        } 
+            email: data.email,
+            // TEMP: until the backend emails a code, pass its dev token straight through
+            resetToken: devResetToken
+        }
     });
 }
 
@@ -39,7 +45,9 @@ export default function ForgotPassword() {
     const router = useRouter();
     const {session} = useSession();
     const [email, setEmail] = useState('');
-    const [errors, setErrors] = useState<{email?: string[], password?: string[]}>();
+    const [errors, setErrors] = useState<{email?: string[]}>();
+    const [submitting, setSubmitting] = useState(false);
+    const api = useApi();
 
     return (
         <PageContainer>
@@ -60,9 +68,17 @@ export default function ForgotPassword() {
                 <ThemedTextInput autoCapitalize="none" keyboardType="email-address" autoComplete="email" placeholder='you@university.edu' value={email} onChangeText={setEmail} theme={theme}/>
             </ThemedInputContainer>
             <View style={{marginTop: 20,}}>
-            <ArrowButton label='Send Code' theme={theme}
+            <ArrowButton label='Send Code' theme={theme} loading={submitting}
                 onPress={async () => {
-                    await handleSubmit({email}, setErrors, router);
+                    setSubmitting(true);
+                    try {
+                        await handleSubmit({email}, setErrors, router, api);
+                    } catch (err) {
+                        // the request failed: show why under the email field
+                        setErrors({ email: [err instanceof Error ? err.message : 'Could not send the code. Try again.'] });
+                    } finally {
+                        setSubmitting(false);
+                    }
                 }}>
             </ArrowButton>
             </View>

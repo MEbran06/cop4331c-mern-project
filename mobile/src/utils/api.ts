@@ -1,6 +1,7 @@
 import { ApiRequest } from "@events/api";
-import { Club, ClubEvent, ClubManagedEvent } from "./events";
+import { Club, ClubEvent, ClubManagedEvent, ClubSurvey, SurveyResults } from "./events";
 import type { EventFormResult } from "@/components/EventForm";
+import type { SurveyFormResult } from "@/components/SurveyForm";
 
 interface ApiClub {
     _id: string,
@@ -125,3 +126,44 @@ export async function deleteEvent(eventId: string, api: ApiRequest): Promise<voi
     if (!res.ok) throw new Error(res.error);
 }
 
+type SurveyStatus = "draft" | "open";
+
+export async function createSurvey(eventId: string, status: SurveyStatus, survey: SurveyFormResult, api: ApiRequest): Promise<ClubSurvey> {
+    const res = await api<ClubSurvey>(`events/${eventId}/survey`, {method: 'POST', body:{status, ...survey}});
+    if (!res.ok) throw new Error(res.error);
+    if (!res.data) throw new Error("Survey data could not be retrieved");
+    return res.data;
+}
+
+export async function updateSurvey(eventId: string, status: SurveyStatus, survey: SurveyFormResult, api: ApiRequest): Promise<ClubSurvey> {
+    const res = await api<ClubSurvey>(`events/${eventId}/survey`, {method: 'PATCH', body:{status, ...survey}});
+    if (!res.ok) throw new Error(res.error);
+    if (!res.data) throw new Error("Survey data could not be retrieved");
+    return res.data;
+}
+
+export async function closeSurvey(eventId: string, api: ApiRequest): Promise<ClubSurvey> {
+    const res = await api<ClubSurvey>(`events/${eventId}/survey`, {method: 'PATCH', body:{status:'closed'}});
+    if (!res.ok) throw new Error(res.error);
+    if (!res.data) throw new Error("Survey data could not be retrieved");
+    return res.data;
+}
+
+export async function getSurveyResults(eventId: string, api: ApiRequest): Promise<SurveyResults> {
+    const res = await api<SurveyResults>(`events/${eventId}/survey/results`);
+    if (!res.ok) throw new Error(res.error);
+    if (!res.data) throw new Error("Survey results could not be retrieved");
+    return res.data;
+}
+
+export async function requestPasswordReset(email: string, api: ApiRequest) {
+    const res = await api<{message: string; devResetToken?:string}>('auth/forgot-password', {method:'POST', body:{email}});
+    if (!res.ok) throw new Error(res.error);
+    if (!res.data) throw new Error("request password reset failed");
+    return res.data;
+}
+
+export async function resetPassword(token: string, newPassword: string, api: ApiRequest) : Promise<void> {
+    const res = await api('auth/reset-password', {method:'POST', body:{token, newPassword}});
+    if (!res.ok) throw new Error(res.error);
+}

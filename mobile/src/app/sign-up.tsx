@@ -2,7 +2,7 @@ import { Pressable, StyleSheet, Text, View } from 'react-native';
 import { fonts, Theme, spacing } from '@/constants/theme';
 import { useTheme } from '@/contexts/theme';
 import { ArrowButton, EyeButton } from '@/components/ThemedButton';
-import { ImperativeRouter, useRouter } from 'expo-router';
+import { useRouter } from 'expo-router';
 import { ButtonHeader } from '@/components/ButtonHeader';
 import { HardShadow } from '@/components/decor';
 import { useState, useMemo } from 'react';
@@ -11,27 +11,40 @@ import * as z from 'zod';
 import { ScrollableSection } from '@/components/ScrollableSection';
 import { ThemedDisplayTitle, ThemedInputContainer, ThemedText, ThemedTextInput } from '@/components/ThemedInputs';
 import { PageContainer } from '@/components/PageContainer';
+import { ApiRequest } from '@events/api';
+import { useApi } from '@/hooks/useApi';
+import { useSession } from '@/contexts/ctx';
 
 const signUpFormSchema = z.object({
-    fullName: z.string().min(1, {message: 'Name is required'}),
+    role: z.enum(['club', 'student']),
+    name: z.string().min(1, {message: 'Name is required'}),
     email: z.string().min(1, {message: 'Email is required'}).email({message: "Invalid email address"}),
-    password: z.string().min(1, 'Password is required')
+    password: z.string().min(8, 'Password must be at least 8 characters')
 });
 
-async function handleSubmit(data: {role: string, fullName: string, email: string, password: string}, setErrors: CallableFunction, router: ImperativeRouter): Promise<void>{
+async function handleSubmit(data: {role: string, name: string, email: string, password: string}, 
+    setErrors: CallableFunction,
+    setSignUpError: (val?:string)=>void,
+    api: ApiRequest): Promise<string>{
+    setSignUpError(undefined); // clear the last attempt's error
     const result = signUpFormSchema.safeParse(data);
     if (!result.success) {
         const flat = result.error.flatten();
         setErrors(flat.fieldErrors);
-        return ;
+        return '';
     }
     setErrors({});
 
-    //TODO: call backend
-    
-    // send to verification
-    router.push({ pathname: '/verify', params: { email: data.email } });
-
+    const res = await api<{ token: string }>('users', { method: 'POST', body: result.data });
+    if (!res.ok) {
+        setSignUpError(res.error); 
+        return '';
+    }
+    if (!res.data) {
+        setSignUpError("token not received")
+        return '';
+    }
+    return res.data.token;
 }
 
 export default function SignUp() {
@@ -42,8 +55,13 @@ export default function SignUp() {
     const [password, setPassword] = useState('');
     const [fullName, setFullName] = useState('');
     const [isPasswordHidden, setPasswordHidden] = useState(true);
-    const [errors, setErrors] = useState<{fullName?: string[], email?: string[], password?: string[]}>();
+    // keys match the schema fields, so "name" (not fullName)
+    const [errors, setErrors] = useState<{name?: string[], email?: string[], password?: string[]}>();
+    const [signUpErrors, setSignUpErrors] = useState<string>();
+    const [submitting, setSubmitting] = useState(false);
     const [role, setRole] = useState<'student'|'club'>('student');
+    const api = useApi();
+    const {signIn} = useSession();
     return (
         <PageContainer>
         <ButtonHeader onAction={() => router.back()} buttonType='arrow-left' theme={theme}>
@@ -76,7 +94,7 @@ export default function SignUp() {
         </View>
 
         <View style={{marginTop:spacing.gap}}>
-            <ThemedInputContainer theme={theme} label='full name' error={errors?.fullName?.at(0)}>
+            <ThemedInputContainer theme={theme} label='full name' error={errors?.name?.at(0)}>
                 <ThemedTextInput placeholder='John Doe' value={fullName} onChangeText={setFullName} theme={theme}/>
             </ThemedInputContainer>
             <ThemedInputContainer theme={theme} 
@@ -94,13 +112,26 @@ export default function SignUp() {
                     onChangeText={setPassword}
                     right={<EyeButton theme={theme} toggle={isPasswordHidden} onPress={() => setPasswordHidden(!isPasswordHidden)}/>}/>
             </ThemedInputContainer>
+            {!!signUpErrors && <Text style={styles.fieldError}>*{signUpErrors}</Text>}
         </View>
-        </ScrollableSection>  
+        </ScrollableSection>
 
         <View style={styles.footer}>
             <View style={{marginHorizontal: 20, marginBottom: 5}}>
-                <ArrowButton onPress={async () => {
-                    await handleSubmit({role, fullName, email, password}, setErrors, router);
+                <ArrowButton loading={submitting} onPress={async () => {
+                    setSubmitting(true);
+                    try {
+                        const token = await handleSubmit({role, name: fullName, email, password}, setErrors, setSignUpErrors, api);
+                        // signing in switches the stack to the user's tabs
+                        if (token) await signIn(token);
+                        // TODO: verify once the backend sends the code
+                        // router.push({ pathname: '/verify', params: { email: email } });
+                    } catch {
+                        // the request itself failed (no connection, server down)
+                        setSignUpErrors('Could not reach the server. Try again.');
+                    } finally {
+                        setSubmitting(false); // always runs, even if the request throws
+                    }
                 }} direction='forward' label='create account' theme={theme}></ArrowButton>
             </View>
             <ThemedText text='have an account?' 
@@ -164,6 +195,15 @@ const stylesGen = (theme: Theme) => StyleSheet.create({
         fontFamily: fonts.display, 
         fontSize: 48, 
         textTransform: 'uppercase'
+    },
+    // same as the login error on sign-in
+    fieldError: {
+        fontFamily: fonts.label,
+        fontSize: 12,
+        letterSpacing: 1,
+        textTransform: 'uppercase',
+        color: theme.primaryText,
+        marginTop: 6,
     },
     footer: {
         borderTopWidth: 3, 

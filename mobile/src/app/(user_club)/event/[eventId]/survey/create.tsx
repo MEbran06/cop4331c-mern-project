@@ -1,15 +1,11 @@
 import { ButtonHeader } from "@/components/ButtonHeader";
 import { PageContainer } from "@/components/PageContainer";
-import { SurveyForm, SurveyFormResult } from "@/components/SurveyForm";
+import { SurveyForm } from "@/components/SurveyForm";
 import { useTheme } from "@/contexts/theme";
 import { useApi } from "@/hooks/useApi";
-import { ApiRequest } from "@events/api";
 import { useLocalSearchParams, useRouter } from "expo-router";
 import { Text } from "react-native";
-
-async function createSurvey(eventId: string, status: "draft" | "open", survey: SurveyFormResult, api: ApiRequest) {
-    // TODO: POST the survey with its status
-}
+import { createSurvey } from "@/utils/api";
 
 export default function SurveyCreate() {
     const {theme} = useTheme();
@@ -25,8 +21,8 @@ export default function SurveyCreate() {
             <SurveyForm
                 theme={theme}
                 heading="create"
-                onSaveDraft={(survey) => createSurvey(eventId, "draft", survey, api)}
-                onPublish={(survey) => createSurvey(eventId, "open", survey, api)}/>
+                onSaveDraft={async (survey) => {await createSurvey(eventId, "draft", survey, api); router.back();}}
+                onPublish={async (survey) => {await createSurvey(eventId, "open", survey, api); router.back();}}/>
         </PageContainer>
     );
 }

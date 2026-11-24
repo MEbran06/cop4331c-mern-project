@@ -10,7 +10,10 @@ import { useState } from "react";
 import { ArrowButton, EyeButton } from "@/components/ThemedButton";
 import * as z from 'zod';
 import { StripeBand } from "@/components/decor";
-import { AuthUser, useSession } from "@/contexts/ctx";
+import { useSession } from "@/contexts/ctx";
+import { resetPassword } from "@/utils/api";
+import { ApiRequest } from "@events/api";
+import { useApi } from "@/hooks/useApi";
 
 const newPasswordSchema = z.object({
     password: z.string().min(8, 'Password must be at least 8 characters'),
@@ -24,7 +27,7 @@ async function handleSubmit(
     data: {password: string, passwordConfirm: string}, 
     resetToken: string, 
     setErrors: CallableFunction,
-    user: AuthUser | null): Promise<boolean> {
+    api: ApiRequest): Promise<boolean> {
     const result = newPasswordSchema.safeParse(data);
     if (!result.success) {
         const flat = result.error.flatten();
@@ -33,7 +36,7 @@ async function handleSubmit(
     }
     setErrors(undefined);
     
-    // Todo: replace with backend call
+    await resetPassword(resetToken, data.password, api);
     return true;
 }
 
@@ -47,6 +50,7 @@ export default function NewPassword() {
     const [passwordConfirm, setPasswordConfirm] = useState('');
     const [submitting, setSubmitting] = useState<boolean>(false);
     const [errors, setErrors] = useState<{password?: string[], passwordConfirm?: string[]}>();
+    const api = useApi();
 
     if (!resetToken) {
         return (
@@ -93,11 +97,13 @@ export default function NewPassword() {
                         onPress={async () => {
                             setSubmitting(true)
                             try {
-                                const success = await handleSubmit({password, passwordConfirm}, resetToken, setErrors, user);
+                                const success = await handleSubmit({password, passwordConfirm}, resetToken, setErrors, api);
                                 if (success) {
                                     Alert.alert('Password updated', user ? 'Your new password is saved.' : 'Log in with your new password.');
                                     router.dismissAll();
                                 }
+                            } catch (err) {
+                                setErrors({ password: [err instanceof Error ? err.message : 'Could not create new password.'] });
                             } finally {
                                 setSubmitting(false);
                             }
