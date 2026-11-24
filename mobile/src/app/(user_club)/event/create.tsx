@@ -6,6 +6,7 @@ import { fonts, Theme } from "@/constants/theme";
 import { useSession } from "@/contexts/ctx";
 import { useTheme } from "@/contexts/theme";
 import { useApi } from "@/hooks/useApi";
+import { createEvent } from "@/utils/api";
 import { ClubProfile, fetchClubProfile } from "@/utils/profiles";
 import { useFocusEffect, useRouter } from "expo-router";
 import { useCallback, useMemo, useState } from "react";
@@ -65,8 +66,9 @@ export default function EventCreate() {
                 heading="new"
                 highlight="event"
                 submitLabel="post event"
-                onSubmit={async () => {
-                    // TODO: POST the event, then router.back()
+                onSubmit={async (event) => {
+                   await createEvent(event, api);
+                   router.back();
                 }}/>
         </PageContainer>
     );

@@ -4,7 +4,6 @@ import { PageContainer } from '@/components/PageContainer';
 import { ScrollableSection } from '@/components/ScrollableSection';
 import { ThemedBox } from '@/components/ThemedBox';
 import { Club, ClubEvent, getEventStatus } from '@/utils/events';
-import { getClubEvents, searchClubById } from '@/utils/mockEvents';
 import { useFocusEffect, useLocalSearchParams, useRouter } from 'expo-router';
 import { useCallback, useState, useMemo } from 'react';
 import { ActivityIndicator, StyleSheet, Text, View } from 'react-native';
@@ -17,6 +16,7 @@ import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { handleSingleToggleFollow } from '@/utils/utils';
 import { EventSection } from '@/components/EventSection';
 import { useApi } from '@/hooks/useApi';
+import { getClub, getClubEvents } from '@/utils/api';
 
 const SECTIONS = [
     { title: 'Happening now', status: 'live',     sort: 'asc'  },
@@ -53,24 +53,23 @@ export default function FollowingPage() {
 
             let active = true;
 
-                // do the search
-                searchClubById(id).then((club) => {
-                    if (!active) return;
-                    SetClub(club || undefined);
-                    SetIsFollowing(club?club.isFollowing:false)
-                    setLoading(false);
-                });
-
-                getClubEvents(id).then((events) => {
-                    if (!active) return;
-                    SetEvents(events)
-                });
+            Promise.all([
+                getClub(id, api), 
+                getClubEvents(id, api)])
+            .then(([club, events]) => { 
+                if (!active) return;
+                SetClub(club);
+                SetEvents(events);
+                SetIsFollowing(club.isFollowing);
+             }).catch(()=>{ if (active) SetClub(undefined);})
+                .finally(()=>{if (active) setLoading(false);})
+    
 
                 
 
-                return () => { active = false; };
+            return () => { active = false; };
 
-        }, [id]));
+        }, [id, api]));
 
     if (loading) {
         return (

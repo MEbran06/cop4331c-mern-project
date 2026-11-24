@@ -10,7 +10,7 @@ import { ButtonHeader } from '@/components/ButtonHeader';
 import { ThemedDisplayTitle } from '@/components/ThemedInputs';
 import { ClubPastEventRow } from '@/components/ClubEventCard';
 import { ClubManagedEvent } from '@/utils/events';
-import { getClubManagedEvents } from '@/utils/mockEvents';
+import { getClubManagedEvents } from '@/utils/api';
 
 const PAGE_SIZE = 20;
 

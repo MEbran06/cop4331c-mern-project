@@ -10,7 +10,7 @@ import { CreateButton } from '@/components/ThemedButton';
 import { useFocusEffect, useRouter } from 'expo-router';
 import { ClubPastEventRow, ClubUpcomingEventCard, SeeAllRow } from '@/components/ClubEventCard';
 import { ClubManagedEvent } from '@/utils/events';
-import { getClubManagedEvents } from '@/utils/mockEvents';
+import { getClubManagedEvents } from '@/utils/api';
 import { useSession } from '@/contexts/ctx';
 import { useApi } from '@/hooks/useApi';
 

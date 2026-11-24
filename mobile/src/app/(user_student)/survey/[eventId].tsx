@@ -1,22 +1,33 @@
 import { PageContainer } from "@/components/PageContainer";
-import { StyleSheet, Text, View } from "react-native";
+import { ActivityIndicator, StyleSheet, Text, View } from "react-native";
 import { useLocalSearchParams, useRouter } from 'expo-router';
-import { estimateSurveyMinutes, formatLongDate, getEventFromId, isSurveyAvailable } from "@/utils/events";
+import { ClubEvent, estimateSurveyMinutes, formatLongDate, isSurveyAvailable } from "@/utils/events";
 import { ButtonHeader } from "@/components/ButtonHeader";
 import { useTheme } from "@/contexts/theme";
 import { fonts, spacing, Theme } from "@/constants/theme";
 import { ScrollableSection } from "@/components/ScrollableSection";
 import { ThemedDisplayTitle } from "@/components/ThemedInputs";
 import { ArrowButton } from "@/components/ThemedButton";
-import { useState, useMemo } from "react";
+import { useState, useMemo, useEffect } from "react";
 import { isQuestionAnswered, QuestionCard, SurveyAnswer } from "@/components/QuestionCard";
 import { ThemedBox } from "@/components/ThemedBox";
 import { StripeBand } from "@/components/decor";
+import { getEvent, submitSurveyResponse } from "@/utils/api";
+import { useApi } from "@/hooks/useApi";
+import { ApiRequest } from "@events/api";
 
 
-async function handleSubmitSurvey(surveyId: string, answers: Record<string, SurveyAnswer>, onSubmitted: () => void) {
-    // await the API call
-    onSubmitted();
+async function handleSubmitSurvey(eventId: string, answers: Record<string, SurveyAnswer>, api:ApiRequest) {
+
+    const surveyAns = Object.entries(answers).filter(([id, answer])=>isQuestionAnswered(answer)).map(([id, answer])=>{
+        
+        const value = typeof answer === 'string' ? answer.trim() : answer;
+        
+        return {questionId:id,
+                value: value}
+    });
+
+    await submitSurveyResponse(eventId, surveyAns, api);
 }
 
 
@@ -25,15 +36,41 @@ export default function Survey() {
     const style = useMemo(() => styleGen(theme), [theme]);
     
     const { eventId } = useLocalSearchParams<{ eventId: string; }>();
-    const event = getEventFromId(eventId);
+    const [event, setEvent] = useState<ClubEvent>();
+    const [error, setError] = useState<string>();
+    const [isLoading, setIsLoading] = useState(true);
     const router = useRouter();
     const [answers, setAnswers] = useState<Record<string, SurveyAnswer>>({});
+    const [submitted, setSubmitted] = useState(false);
+    const [submitting, setSubmitting] = useState(false);
+    const [submitError, setSubmitError] = useState<string>();
+    const api = useApi();
+
+    useEffect(()=>{
+        let active = true;
+
+        getEvent(eventId, api).then((event) => {
+            if (!active) return;
+            setEvent(event);
+            setError(undefined);
+        }).catch((error)=>{if (active) setError(error.message)})
+            .finally(()=>{if (active) setIsLoading(false)});
+
+        return ()=>{active=false}
+    },[eventId, api]);
+
     const canSubmit = event?.survey?.questions
     .filter((question) => question.required)
     .every((question) => isQuestionAnswered(answers[question.id]));
 
-    const [submitted, setSubmitted] = useState(false);
 
+    if (isLoading) {
+        return (
+            <PageContainer>
+                <ActivityIndicator style={{ marginTop: 40 }} color={theme.ink}/>
+            </PageContainer>
+        );
+    }
 
     if (!event) {
         return (
@@ -41,7 +78,7 @@ export default function Survey() {
                 <ButtonHeader onAction={router.back} theme={theme} buttonType="arrow-left"/>
                 <ThemedDisplayTitle fontSize={48} theme={theme} text="event not" highlight="found"/>
                 <Text style={style.notFoundText}>
-                    Event not found or doesn't exist.
+                   {error}
                 </Text>
                 <View style={{ marginTop: spacing.gap }}>
                     <ArrowButton theme={theme} label="back to feed" onPress={() => router.replace('/')}/>
@@ -133,7 +170,24 @@ export default function Survey() {
             <View style={style.footer}>
                 <ArrowButton label="submit feedback"
                     theme={theme} disabled={!canSubmit}
-                    onPress={() => handleSubmitSurvey(event.survey!.id, answers, () => setSubmitted(true))}/>
+                    loading={submitting}
+                    onPress={async () => {
+                        setSubmitting(true);
+                        setSubmitError(undefined); // clear the last attempt's error
+                        try {
+                            await handleSubmitSurvey(event.id, answers, api);
+                            setSubmitted(true);
+                        } catch (err) {
+                            // failed: stay on the form and say why
+                            setSubmitError(err instanceof Error ? err.message : "Could not send your feedback. Try again.");
+                        } finally {
+                            setSubmitting(false);
+                        }
+
+                    }}/>
+                {!!submitError && (
+                    <Text style={[style.hint, { color: theme.primaryText }]}>{submitError}</Text>
+                )}
                 {firstMissing !== -1 && (
                     <Text style={style.hint}>Answer question {firstMissing + 1} to submit</Text>
                 )}
