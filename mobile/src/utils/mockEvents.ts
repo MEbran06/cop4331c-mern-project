@@ -474,41 +474,6 @@ export async function getClubEvents(clubId: string): Promise<ClubEvent[]> {
     return MOCK_EVENTS.filter(event=>event.club.id===clubId).map((event) => ({ ...event }))
 }
 
-export interface EventsPage {
-    events: ClubManagedEvent[];
-    total: number;
-}
-
-export async function getClubManagedEvents(
-    clubId: string,
-    api: ApiRequest,
-    { when, limit = 20, skip = 0 }: { when: 'upcoming' | 'past'; limit?: number; skip?: number },
-): Promise<EventsPage>  {
-
-    const now = new Date();
-
-    const matching = MOCK_CLUB_EVENTS.filter((event) => {
-        const isPast = new Date(event.endsAt) < now;
-        return when === 'past' ? isPast : !isPast;
-    });
-
-    const time = (event: ClubManagedEvent) => new Date(event.startsAt).getTime();
-
-    const sorted = matching.sort((a, b) =>
-        when === 'past'
-            ? time(b) - time(a)   // newest first
-            : time(a) - time(b)   // soonest first
-    );
-
-
-
-    await new Promise((resolve) => setTimeout(resolve, 300)); // fake network delay
-    return {
-        events:sorted.slice(skip, skip + limit),
-        total: matching.length,
-    };
-}
-
 export async function getClubManagedEvent(eventId: string, api: ApiRequest) : Promise<ClubManagedEvent>{
     const found = MOCK_CLUB_EVENTS.find((event)=>event.id===eventId)
     if (!found) throw new Error("Event not found");

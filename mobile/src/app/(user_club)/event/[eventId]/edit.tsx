@@ -8,7 +8,7 @@ import { useSession } from "@/contexts/ctx";
 import { useTheme } from "@/contexts/theme";
 import { useApi } from "@/hooks/useApi";
 import { ClubManagedEvent } from "@/utils/events";
-import { getClubManagedEvent } from "@/utils/mockEvents";
+import { deleteEvent, getClubManagedEvent, updateEvent } from "@/utils/api";
 import { ClubProfile, fetchClubProfile } from "@/utils/profiles";
 import { useFocusEffect, useLocalSearchParams, useRouter } from "expo-router";
 import { useCallback, useEffect, useMemo, useState } from "react";
@@ -62,8 +62,13 @@ export default function EventEdit() {
                 {
                     text: "Delete",
                     style: "destructive",
-                    onPress: () => {
-                        // TODO: DELETE the event, then router.back()
+                    onPress: async () => {
+                        try {
+                            await deleteEvent(eventId, api);
+                            router.back();
+                        } catch {
+                            Alert.alert("Could not delete the event", "Check your connection and try again.");
+                        }
                     },
                 },
             ],
@@ -113,8 +118,9 @@ export default function EventEdit() {
                         location: event.location,
                         description: event.description,
                     }}
-                    onSubmit={async () => {
-                        // TODO: PATCH the event, then router.back()
+                    onSubmit={async (updated) => {
+                        await updateEvent(eventId, updated, api);
+                        router.back();
                     }}
                     footer={
                         <View style={style.deleteButton}>

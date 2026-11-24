@@ -1,6 +1,3 @@
-import { MOCK_EVENTS } from "./mockEvents";
-
-// Matches surveyQuestionSchema in backend/db_schema.js
 export type SurveyQuestionType = 'text' | 'single_choice' | 'multiple_choice';
 
 export type SurveyStatusType = 'draft' | 'open' | 'closed'
@@ -128,10 +125,6 @@ export function formatEnded(endIso: string, now: Date = new Date()) {
     if (end >= startOfToday) return 'Ended today';
     if (end >= startOfYesterday) return 'Ended yesterday';
     return `Ended ${end.toLocaleDateString('en-US', { month: 'short', day: 'numeric' })}`;
-}
-
-export function getEventFromId(id: string) : ClubEvent | undefined {
-    return MOCK_EVENTS.find(event => event.id === id);
 }
 
 // The backend doesn't store a time estimate, so work one out from the questions:
